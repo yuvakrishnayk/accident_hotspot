@@ -5,10 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:math' as Math;
-
-// Add these imports
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:dio/dio.dart';
 
 class AccidentPrediction {
   final double latitude;
@@ -39,15 +36,15 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? mylocation;
   String? placeName;
   List<AccidentPrediction> predictions = [];
+  final Dio dio = Dio();
 
   Future<Map<String, dynamic>> predictAccident(LatLng location) async {
     print(
         '\nPredicting for location: (${location.latitude}, ${location.longitude})');
     try {
-      final response = await http.post(
-        Uri.parse('https://jaga001.pythonanywhere.com/predict'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        'http://127.0.0.1:5000/predict',
+        data: {
           'Latitude': location.latitude,
           'Longitude': location.longitude,
           'Weather': "Rainy",
@@ -69,15 +66,16 @@ class _MapScreenState extends State<MapScreen> {
           'Day': 15,
           'Month': 1,
           'DayOfWeek': 5,
-        }),
+        },
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
+        final result = response.data as Map<String, dynamic>;
         print('Prediction result: ${result['prediction']}');
         return result;
       } else {
-        print('Error: ${response.statusCode} - ${response.body}');
+        print('Error: ${response.statusCode} - ${response.data}');
         throw Exception('Failed to predict accident');
       }
     } catch (e) {

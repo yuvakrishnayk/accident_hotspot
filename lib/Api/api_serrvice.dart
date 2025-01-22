@@ -1,24 +1,23 @@
-// api_service.dart
-import 'dart:convert';
 import 'package:accident_hotspot/Model/model.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class ApiService {
   static const String baseUrl = 'https://jaga001.pythonanywhere.com';
+  final Dio dio = Dio();
 
   Future<Map<String, dynamic>> predictAccident(
       AccidentPrediction prediction) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/predict'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(prediction.toJson()),
+      final response = await dio.post(
+        '$baseUrl/predict',
+        data: prediction.toJson(),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data as Map<String, dynamic>;
       } else {
         throw Exception('Failed to predict accident: ${response.statusCode}');
       }
