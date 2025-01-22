@@ -147,37 +147,16 @@ class _MapScreenState extends State<MapScreen> {
     print('Current position: (${position.latitude}, ${position.longitude})');
 
     setState(() {
-      mylocation = currentLatLng;
+      mylocation = LatLng(position.latitude, position.longitude);
     });
+    mapController.move(mylocation!, 15);
+    await _getNearbyLocations(mylocation!);
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    // Get initial location
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showCurrentLocation();
-    });
-
-    // Start listening to location changes
-    _positionStreamSubscription = Geolocator.getPositionStream(
-            locationSettings: LocationSettings(
-                accuracy: LocationAccuracy.high, distanceFilter: 20))
-        .listen((Position position) {
-      _updateLocation(position);
-    });
-  }
-
-  @override
-  void dispose() {
-    _positionStreamSubscription?.cancel();
-    super.dispose();
-  }
-
-  // --- UI ---
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
         children: [
           FlutterMap(
             mapController: mapController,
@@ -228,16 +207,18 @@ class _MapScreenState extends State<MapScreen> {
                   onPressed: showCurrentLocation,
                   child: Icon(Icons.location_searching_outlined),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 20),
                 FloatingActionButton(
                   backgroundColor: Colors.white,
                   foregroundColor: const Color.fromARGB(255, 39, 126, 192),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatBotScreen()));
-                    
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChatBotScreen()));
                   },
                   child: Icon(Icons.headset_mic),
-                ),
+                )
               ],
             ),
           ),
