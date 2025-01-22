@@ -1,10 +1,9 @@
 import 'dart:async';
-
+import 'package:accident_hotspot/Maps/Chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-
 import 'dart:math' as Math;
 
 class MapScreen extends StatefulWidget {
@@ -128,9 +127,7 @@ class _MapScreenState extends State<MapScreen> {
     // Start listening to location changes
     _positionStreamSubscription = Geolocator.getPositionStream(
             locationSettings: LocationSettings(
-                accuracy: LocationAccuracy.high,
-                distanceFilter: 20
-                ))
+                accuracy: LocationAccuracy.high, distanceFilter: 20))
         .listen((Position position) {
       _updateLocation(position);
     });
@@ -186,6 +183,16 @@ class _MapScreenState extends State<MapScreen> {
                   foregroundColor: Colors.indigo,
                   onPressed: showCurrentLocation,
                   child: Icon(Icons.location_searching_outlined),
+                ),
+                SizedBox(height: 10),
+                FloatingActionButton(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color.fromARGB(255, 39, 126, 192),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatBotScreen()));
+                    
+                  },
+                  child: Icon(Icons.headset_mic),
                 ),
               ],
             ),
