@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:accident_hotspot/Maps/Chat.dart';
+import 'package:accident_hotspot/Setting_Page/setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'dart:math' as Math;
 import 'package:dio/dio.dart';
 
 class AccidentPrediction {
@@ -33,17 +34,80 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController mapController = MapController();
-  LatLng? mylocation;
-  String? placeName;
+  LatLng? myLocation;
+  bool isLoading = false;
   List<AccidentPrediction> predictions = [];
   final Dio dio = Dio();
 
+  Future<void> showCurrentLocation() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      setState(() {
+        myLocation = LatLng(position.latitude, position.longitude);
+        isLoading = false;
+      });
+      mapController.move(myLocation!, 15);
+      await _getNearbyLocations(myLocation!);
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to get location: $e')),
+      );
+    }
+  }
+
+  Future<void> _getNearbyLocations(LatLng center) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final double maxDistance = 0.05; // Maximum radius from center
+      final int numberOfLocations = 20;
+      final random = math.Random();
+
+      for (int i = 0; i < numberOfLocations; i++) {
+        final double distance = random.nextDouble() * maxDistance;
+        final double angle = random.nextDouble() * 2 * math.pi;
+        final double xOffset = distance * math.cos(angle);
+        final double yOffset = distance * math.sin(angle);
+        final LatLng location =
+            LatLng(center.latitude + xOffset, center.longitude + yOffset);
+
+        final prediction = await predictAccident(location);
+        final accidentPrediction = AccidentPrediction(
+          latitude: location.latitude,
+          longitude: location.longitude,
+          prediction: prediction['prediction'] ?? 'Unknown',
+        );
+
+        setState(() {
+          predictions.add(accidentPrediction);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to get nearby locations: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   Future<Map<String, dynamic>> predictAccident(LatLng location) async {
-    print(
-        '\nPredicting for location: (${location.latitude}, ${location.longitude})');
     try {
       final response = await dio.post(
-        'http://127.0.0.1:5000/predict',
+        'https://jaga001.pythonanywhere.com/predict',
         data: {
           'Latitude': location.latitude,
           'Longitude': location.longitude,
@@ -71,156 +135,166 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       if (response.statusCode == 200) {
-        final result = response.data as Map<String, dynamic>;
-        print('Prediction result: ${result['prediction']}');
-        return result;
+        return response.data as Map<String, dynamic>;
       } else {
-        print('Error: ${response.statusCode} - ${response.data}');
-        throw Exception('Failed to predict accident');
+        throw Exception('Failed to predict accident: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error making prediction: $e');
       throw Exception('Failed to predict accident: $e');
     }
-  }
-
-  Future<void> _getNearbyLocations(LatLng center) async {
-    print('\n=== Starting predictions for random locations ===');
-    print('Center point: (${center.latitude}, ${center.longitude})');
-
-    setState(() {
-      predictions.clear();
-    });
-
-    final double maxDistance = 0.05; // Maximum radius from center
-    final int numberOfLocations = 20;
-    final random = Math.Random();
-
-    for (int i = 0; i < numberOfLocations; i++) {
-      print('\nCalculating location ${i + 1} of $numberOfLocations');
-
-      // Generate random distance and angle
-      final double distance = random.nextDouble() * maxDistance;
-      final double angle = random.nextDouble() * 2 * Math.pi;
-
-      // Convert to lat/lng offsets
-      final double xOffset = distance * Math.cos(angle);
-      final double yOffset = distance * Math.sin(angle);
-
-      final LatLng location =
-          LatLng(center.latitude + xOffset, center.longitude + yOffset);
-
-      try {
-        final prediction = await predictAccident(location);
-        final accidentPrediction = AccidentPrediction(
-          latitude: location.latitude,
-          longitude: location.longitude,
-          prediction: prediction['prediction'] ?? 'Unknown',
-        );
-
-        print('Location ${i + 1} prediction complete:');
-        print(accidentPrediction.toString());
-
-        setState(() {
-          predictions.add(accidentPrediction);
-        });
-      } catch (e) {
-        print('Error predicting for location $location: $e');
-      }
-    }
-
-    print('\n=== All predictions complete ===');
-    print('Total predictions made: ${predictions.length}');
-    print('\nSummary of all predictions:');
-    for (int i = 0; i < predictions.length; i++) {
-      print('${i + 1}. ${predictions[i]}');
-    }
-  }
-
-  Future<void> showCurrentLocation() async {
-    print('\n=== Getting current location ===');
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    print('Current position: (${position.latitude}, ${position.longitude})');
-
-    setState(() {
-      mylocation = LatLng(position.latitude, position.longitude);
-    });
-    mapController.move(mylocation!, 15);
-    await _getNearbyLocations(mylocation!);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text('Accident Hotspots',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF007B83),
+        elevation: 4,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(),
+                  ));
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
-              initialZoom: 13,
+              initialCenter: myLocation ??
+                  LatLng(0, 0), // Default center if location is null
+              initialZoom: 14,
+              interactionOptions: InteractionOptions(
+                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              ),
             ),
             children: [
               TileLayer(
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: 'com.example.accident_hotspot',
               ),
               MarkerLayer(
                 markers: [
-                  if (mylocation != null)
+                  if (myLocation != null)
                     Marker(
-                      point: mylocation!,
-                      width: 80,
-                      height: 80,
-                      child: Icon(
-                        Icons.location_on,
-                        color: Colors.green,
-                        size: 40,
-                      ),
+                      point: myLocation!,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.location_pin,
+                          color: Colors.blue, size: 40),
                     ),
                   ...predictions.map(
                     (prediction) => Marker(
                       point: LatLng(prediction.latitude, prediction.longitude),
-                      width: 80,
-                      height: 80,
+                      width: 40,
+                      height: 40,
                       child: Icon(
-                        Icons.warning,
-                        color: Colors.red,
-                        size: 30,
+                        Icons.warning_amber_rounded,
+                        color: _getPredictionColor(prediction.prediction),
+                        size: 32,
                       ),
                     ),
                   ),
                 ],
               ),
+              Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    FloatingActionButton.small(
+                      child: const Icon(Icons.add),
+                      onPressed: () {
+                        mapController.move(
+                          mapController.camera.center,
+                          mapController.camera.zoom + 1,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    FloatingActionButton.small(
+                      child: const Icon(Icons.remove),
+                      onPressed: () {
+                        mapController.move(
+                          mapController.camera.center,
+                          mapController.camera.zoom - 1,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
+          if (isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
+              ),
+            ),
           Positioned(
             bottom: 20,
             right: 20,
             child: Column(
               children: [
-                FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.indigo,
+                _buildActionButton(
+                  icon: Icons.location_searching,
+                  color: Colors.blueGrey[900]!,
                   onPressed: showCurrentLocation,
-                  child: Icon(Icons.location_searching_outlined),
                 ),
-                SizedBox(height: 20),
-                FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color.fromARGB(255, 39, 126, 192),
+                const SizedBox(height: 12),
+                _buildActionButton(
+                  icon: Icons.headphones,
+                  color: Colors.blueGrey[800]!,
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChatBotScreen()));
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ChatBotScreen()),
+                    );
                   },
-                  child: Icon(Icons.headset_mic),
-                )
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Color _getPredictionColor(String prediction) {
+    if (prediction.toLowerCase().contains('high')) {
+      return Colors.red[800]!;
+    } else if (prediction.toLowerCase().contains('medium')) {
+      return Colors.red[800]!;
+    }
+    return Colors.red[800]!;
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Material(
+      shape: const CircleBorder(),
+      elevation: 4,
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white),
+        style: IconButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.all(16),
+        ),
+        onPressed: onPressed,
       ),
     );
   }
