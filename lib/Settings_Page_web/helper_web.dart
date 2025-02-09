@@ -14,6 +14,7 @@ class HelpSupportPageWeb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: FadeInDown(
           // Animates the App Bar title
           child: const Text(

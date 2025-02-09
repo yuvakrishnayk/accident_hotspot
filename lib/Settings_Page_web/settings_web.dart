@@ -33,6 +33,7 @@ class _SettingsPageWebState extends State<SettingsPageWeb> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0,
         title: FadeInDown(
           child: Text('Settings',

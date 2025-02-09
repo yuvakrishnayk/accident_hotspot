@@ -32,6 +32,7 @@ class _NotificationSettingsPageWebState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: FadeInDown(
           // Animate Appbar Title
           child: const Text(

@@ -1,4 +1,4 @@
-import 'package:accident_hotspot/Login%20Page/Forgot.dart';
+import 'package:accident_hotspot/Login%20Page/forgot.dart';
 import 'package:accident_hotspot/Login%20Page/Sign_Up.dart';
 import 'package:accident_hotspot/Maps/Map_Screen.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +40,18 @@ class LoginPage extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Accident Prediction And Prevention',
+                    'S A F O R A',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: accentColor,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Text(
+                    'Accident Hotspot and Prevention',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,

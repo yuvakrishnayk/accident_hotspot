@@ -168,6 +168,7 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Profile Settings'),
         backgroundColor: widget.accentColor,
         centerTitle: true,

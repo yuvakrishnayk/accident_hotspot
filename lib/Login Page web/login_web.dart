@@ -1,5 +1,5 @@
-import 'package:accident_hotspot/Login%20Page%20web/Forgot_web.dart';
-import 'package:accident_hotspot/Login%20Page%20web/Sign_Up_Web.dart';
+import 'package:accident_hotspot/Login%20Page%20web/forgot_web.dart';
+import 'package:accident_hotspot/Login%20Page%20web/sign_up_web.dart';
 import 'package:accident_hotspot/Maps/Map_Screen_web.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart'; // Animation Package (install: `flutter pub add animate_do`)
@@ -70,13 +70,27 @@ class _LoginPageWebState extends State<LoginPageWeb> {
                       FadeIn(
                         delay: Duration(milliseconds: 500),
                         child: Text(
-                          'SAFORA',
+                          'S A F O R A',
                           style: TextStyle(
                             fontSize: screenWidth > 600 ? 24 : 22,
                             fontWeight: FontWeight.w600,
                             color: accentColor,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      FadeIn(
+                        delay: Duration(milliseconds: 500),
+                        child: Text(
+                          'Accident Hotspot and Prevention',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: accentColor,
+                          ),
                         ),
                       ),
                       SizedBox(height: 40),

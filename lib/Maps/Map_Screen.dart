@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:accident_hotspot/Maps/Chat.dart';
+import 'package:accident_hotspot/Maps/chat.dart';
 import 'package:accident_hotspot/Setting_Page/setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
