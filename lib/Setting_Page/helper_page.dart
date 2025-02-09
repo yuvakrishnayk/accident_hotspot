@@ -1,3 +1,6 @@
+import 'package:accident_hotspot/Helper_Pages/about.dart';
+import 'package:accident_hotspot/Helper_Pages/contact.dart';
+import 'package:accident_hotspot/Helper_Pages/faq.dart';
 import 'package:flutter/material.dart';
 
 class HelpSupportPage extends StatelessWidget {
@@ -33,7 +36,8 @@ class HelpSupportPage extends StatelessWidget {
               title: 'About the App',
               subtitle: 'Learn more about the app and its features.',
               onTap: () {
-                // Add navigation or action here
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AboutPage()));
               },
             ),
             const SizedBox(height: 16),
@@ -42,7 +46,10 @@ class HelpSupportPage extends StatelessWidget {
               title: 'Contact Support',
               subtitle: 'Get in touch with our support team.',
               onTap: () {
-                // Add navigation or action here
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ContactSupportPage()));
               },
             ),
             const SizedBox(height: 16),
@@ -51,7 +58,8 @@ class HelpSupportPage extends StatelessWidget {
               title: 'FAQ',
               subtitle: 'Find answers to frequently asked questions.',
               onTap: () {
-                // Add navigation or action here
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => FAQPage()));
               },
             ),
           ],

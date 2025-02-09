@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:accident_hotspot/Maps/Chat.dart';
-import 'package:accident_hotspot/Setting_Page/setting_page.dart';
+import 'package:accident_hotspot/Maps/Chat_Web.dart';
+import 'package:accident_hotspot/Settings_Page_web/settings_web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,14 +25,14 @@ class AccidentPrediction {
   }
 }
 
-class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+class MapScreenWeb extends StatefulWidget {
+  const MapScreenWeb({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  State<MapScreenWeb> createState() => _MapScreenWebState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenWebState extends State<MapScreenWeb> {
   final MapController mapController = MapController();
   LatLng? myLocation;
   bool isLoading = false;
@@ -205,7 +205,7 @@ class _MapScreenState extends State<MapScreen> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SettingsPage(),
+                    builder: (context) => SettingsPageWeb(),
                   ));
             },
           ),
@@ -306,7 +306,7 @@ class _MapScreenState extends State<MapScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ChatBotScreen()),
+                          builder: (context) => const ChatBotScreenWeb()),
                     );
                   },
                 ),
@@ -334,9 +334,9 @@ class _MapScreenState extends State<MapScreen> {
     if (prediction.toLowerCase().contains('high')) {
       return Colors.red[800]!;
     } else if (prediction.toLowerCase().contains('medium')) {
-      return Colors.orange[800]!;
+      return Colors.red[800]!;
     }
-    return Colors.yellow[800]!;
+    return Colors.red[800]!;
   }
 
   Widget _buildActionButton({

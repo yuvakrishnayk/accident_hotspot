@@ -1,3 +1,4 @@
+import 'package:accident_hotspot/Maps/Map_Screen.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -11,7 +12,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   int age = 0;
   String vehicleType = '';
@@ -19,7 +21,8 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     final Color themeColor = Color(0xFFA1E6E7); // Light gradient theme color
-    final Color accentColor = Color(0xFF007B83); // Accent for icons and focused borders
+    final Color accentColor =
+        Color(0xFF007B83); // Accent for icons and focused borders
 
     return Scaffold(
       body: Container(
@@ -220,7 +223,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Register Button
                 ElevatedButton(
                   onPressed: () {
-                    if (passwordController.text == confirmPasswordController.text) {
+                    if (passwordController.text ==
+                        confirmPasswordController.text) {
                       print('Registration Successful!');
                       print('Name: ${nameController.text}');
                       print('DOB: ${dobController.text}');
@@ -228,6 +232,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       print('Email: ${emailController.text}');
                       print('Phone: ${phoneController.text}');
                       print('Vehicle Type: $vehicleType');
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => MapScreen()));
                     } else {
                       showDialog(
                         context: context,

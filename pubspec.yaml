@@ -28,17 +28,40 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  animate_do: ^3.3.9
+  another_flushbar: ^1.12.30
+  awesome_dialog: ^3.2.1
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
+  firebase_auth: ^5.4.2
   flutter:
     sdk: flutter
+  flutter_animate: ^4.5.2
   flutter_map: ^7.0.2
+  flutter_map_location_marker: ^9.1.1
+  flutter_map_marker_cluster: ^1.4.0
+  flutter_markdown: ^0.7.6+1
+  flutter_spinkit: ^5.2.1
+  flutter_svg: ^2.0.17
+  flutter_typeahead: ^5.2.0
+  font_awesome_flutter: ^10.8.0
+  geocoding: ^3.0.0
   geolocator: ^13.0.2
+  image_picker: ^1.1.2
   intl: ^0.20.1
   latlong2: ^0.9.1
 
-dev_dependencies:
+  mask_text_input_formatter: ^2.9.0
+  responsive_builder: ^0.7.1
+  settings_ui: ^2.0.2
+  share_plus: ^10.1.4
+  shared_preferences: ^2.5.1
+  shimmer: ^3.0.0
+  url_launcher: ^6.3.1
+  validators: ^3.0.0
+  webview_flutter: ^4.10.0
 
+dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -52,6 +75,8 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
