@@ -77,14 +77,14 @@ class ChatMessage {
   });
 }
 
-class ChatBotScreen extends StatefulWidget {
-  const ChatBotScreen({super.key});
+class ChatBotScreenWeb extends StatefulWidget {
+  const ChatBotScreenWeb({super.key});
 
   @override
-  State<ChatBotScreen> createState() => _ChatBotScreenState();
+  State<ChatBotScreenWeb> createState() => _ChatBotScreenWebState();
 }
 
-class _ChatBotScreenState extends State<ChatBotScreen> {
+class _ChatBotScreenWebState extends State<ChatBotScreenWeb> {
   final TextEditingController _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
   final ChatbotService _chatbotService = ChatbotService();

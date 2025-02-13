@@ -7,7 +7,8 @@ class ForgottenPasswordPage extends StatefulWidget {
 
 class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isPasswordStrong(String password) {
@@ -97,6 +98,23 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        TextFormField(
+                          controller: newPasswordController,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'Enter your Email',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: Icon(Icons.lock, color: accentColor),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: accentColor, width: 2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
                         // New Password Field
                         TextFormField(
                           controller: newPasswordController,
@@ -108,7 +126,8 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                             ),
                             prefixIcon: Icon(Icons.lock, color: accentColor),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: accentColor, width: 2),
+                              borderSide:
+                                  BorderSide(color: accentColor, width: 2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
@@ -136,7 +155,8 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                             ),
                             prefixIcon: Icon(Icons.lock, color: accentColor),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: accentColor, width: 2),
+                              borderSide:
+                                  BorderSide(color: accentColor, width: 2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
@@ -155,12 +175,14 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                           onPressed: _resetPassword,
                           child: Text(
                             'Reset Password',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor,
                             foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

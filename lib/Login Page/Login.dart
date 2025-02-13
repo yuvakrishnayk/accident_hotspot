@@ -1,9 +1,7 @@
-import 'package:accident_hotspot/Login%20Page/Forgot.dart';
+import 'package:accident_hotspot/Login%20Page/forgot.dart';
 import 'package:accident_hotspot/Login%20Page/Sign_Up.dart';
 import 'package:accident_hotspot/Maps/Map_Screen.dart';
 import 'package:flutter/material.dart';
-
-
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -12,10 +10,12 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color themeColor = Color(0xFFA1E6E7); // Theme color
-    final Color accentColor = Color(0xFF007B83); // Darker accent for links and text
+    final Color accentColor =
+        Color(0xFF007B83); // Darker accent for links and text
 
     return Scaffold(
-      body: SizedBox.expand( // Ensures the container covers the entire screen
+      body: SizedBox.expand(
+        // Ensures the container covers the entire screen
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -34,14 +34,24 @@ class LoginPage extends StatelessWidget {
                   SizedBox(height: 60),
 
                   // App Logo or Title
-                  Icon(
-                    Icons.dangerous_outlined,
-                    size: 80,
-                    color: accentColor,
+                  Image.network(
+                    'https://i.ibb.co/dwBJ16GL/iconn-removebg-preview.png',
+                    scale: 3,
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Accident Prediction And Prevention',
+                    'S A F O R A',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: accentColor,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Text(
+                    'Accident Hotspot and Prevention',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
@@ -121,7 +131,8 @@ class LoginPage extends StatelessWidget {
                     },
                     child: Text(
                       'Login',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
