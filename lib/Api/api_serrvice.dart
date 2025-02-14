@@ -1,4 +1,4 @@
-import 'package:accident_hotspot/Model/model.dart';
+import 'package:accident_hotspot/Models/model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {

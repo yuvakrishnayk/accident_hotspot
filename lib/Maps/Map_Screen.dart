@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:accident_hotspot/Maps/chat.dart';
-import 'package:accident_hotspot/Setting_Page/setting_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:accident_hotspot/Maps/Chat_Web.dart';
+import 'package:accident_hotspot/Settings_Page_web/settings_web.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AccidentPrediction {
   final double latitude;
@@ -26,19 +25,27 @@ class AccidentPrediction {
 }
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  const MapScreen({Key? key}) : super(key: key);
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final MapController mapController = MapController();
+  final Completer<GoogleMapController> _controller = Completer();
   LatLng? myLocation;
   bool isLoading = false;
   List<AccidentPrediction> predictions = [];
   final Dio dio = Dio();
   bool _isSatelliteView = false;
+  double _currentZoom = 15.0;
+
+  CameraPosition get _initialCameraPosition {
+    if (myLocation != null) {
+      return CameraPosition(target: myLocation!, zoom: _currentZoom);
+    }
+    return const CameraPosition(target: LatLng(0, 0), zoom: 2);
+  }
 
   Future<void> showCurrentLocation() async {
     setState(() {
@@ -47,13 +54,18 @@ class _MapScreenState extends State<MapScreen> {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+          desiredAccuracy: LocationAccuracy.high);
       setState(() {
         myLocation = LatLng(position.latitude, position.longitude);
         isLoading = false;
       });
-      mapController.move(myLocation!, 15);
+
+      final GoogleMapController controller = await _controller.future;
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: myLocation!, zoom: _currentZoom),
+        ),
+      );
       await _getNearbyLocations(myLocation!);
     } catch (e) {
       setState(() {
@@ -175,7 +187,7 @@ class _MapScreenState extends State<MapScreen> {
                           'Location: (${prediction.latitude}, ${prediction.longitude})'),
                       subtitle: Text('Prediction: ${prediction.prediction}'),
                       trailing: Icon(
-                        Icons.warning_amber_rounded,
+                        Icons.add_alert, // Alert icon
                         color: _getPredictionColor(prediction.prediction),
                       ),
                     );
@@ -189,11 +201,92 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Color _getPredictionColor(String prediction) {
+    if (prediction.toLowerCase().contains('high')) {
+      return Colors.red[800]!;
+    } else if (prediction.toLowerCase().contains('medium')) {
+      return Colors.orange;
+    }
+    return Colors.green;
+  }
+
+  Future<void> _zoomIn() async {
+    _currentZoom += 1;
+    final GoogleMapController controller = await _controller.future;
+    if (myLocation != null) {
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: myLocation!, zoom: _currentZoom),
+        ),
+      );
+    }
+  }
+
+  Future<void> _zoomOut() async {
+    _currentZoom -= 1;
+    final GoogleMapController controller = await _controller.future;
+    if (myLocation != null) {
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: myLocation!, zoom: _currentZoom),
+        ),
+      );
+    }
+  }
+
+  Set<Marker> _buildMarkers() {
+    final markers = <Marker>{};
+
+    if (myLocation != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('currentLocation'),
+          position: myLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      );
+    }
+
+    for (var i = 0; i < predictions.length; i++) {
+      final prediction = predictions[i];
+      markers.add(
+        Marker(
+          markerId: MarkerId('prediction_$i'),
+          position: LatLng(prediction.latitude, prediction.longitude),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: InfoWindow(
+            title: 'Prediction: ${prediction.prediction}',
+            snippet: '(${prediction.latitude}, ${prediction.longitude})',
+          ),
+        ),
+      );
+    }
+    return markers;
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Material(
+      shape: const CircleBorder(),
+      elevation: 4,
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white),
+        style: IconButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.all(16),
+        ),
+        onPressed: onPressed,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: const Text('Accident Hotspots',
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF007B83),
@@ -203,84 +296,29 @@ class _MapScreenState extends State<MapScreen> {
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsPage(),
-                  ));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPageWeb(),
+                ),
+              );
             },
           ),
         ],
       ),
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: mapController,
-            options: MapOptions(
-              initialCenter: myLocation ?? LatLng(0, 0),
-              initialZoom: 14,
-              interactionOptions: InteractionOptions(
-                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-              ),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: _isSatelliteView
-                    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-                    : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                userAgentPackageName: 'com.example.accident_hotspot',
-              ),
-              MarkerLayer(
-                markers: [
-                  if (myLocation != null)
-                    Marker(
-                      point: myLocation!,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(Icons.location_pin,
-                          color: Colors.blue, size: 40),
-                    ),
-                  ...predictions.map(
-                    (prediction) => Marker(
-                      point: LatLng(prediction.latitude, prediction.longitude),
-                      width: 40,
-                      height: 40,
-                      child: Icon(
-                        Icons.warning_amber_rounded,
-                        color: _getPredictionColor(prediction.prediction),
-                        size: 32,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                top: 20,
-                right: 20,
-                child: Column(
-                  children: [
-                    FloatingActionButton.small(
-                      child: const Icon(Icons.add),
-                      onPressed: () {
-                        mapController.move(
-                          mapController.camera.center,
-                          mapController.camera.zoom + 1,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    FloatingActionButton.small(
-                      child: const Icon(Icons.remove),
-                      onPressed: () {
-                        mapController.move(
-                          mapController.camera.center,
-                          mapController.camera.zoom - 1,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          GoogleMap(
+            initialCameraPosition: _initialCameraPosition,
+            mapType: _isSatelliteView ? MapType.satellite : MapType.normal,
+            onMapCreated: (GoogleMapController controller) {
+              if (!_controller.isCompleted) {
+                _controller.complete(controller);
+              }
+            },
+            markers: _buildMarkers(),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
           ),
           if (isLoading)
             const Center(
@@ -288,6 +326,25 @@ class _MapScreenState extends State<MapScreen> {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
               ),
             ),
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Column(
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'zoomIn',
+                  child: const Icon(Icons.add),
+                  onPressed: _zoomIn,
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  heroTag: 'zoomOut',
+                  child: const Icon(Icons.remove),
+                  onPressed: _zoomOut,
+                ),
+              ],
+            ),
+          ),
           Positioned(
             bottom: 20,
             right: 20,
@@ -306,7 +363,7 @@ class _MapScreenState extends State<MapScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ChatBotScreen()),
+                          builder: (context) => const ChatBotScreenWeb()),
                     );
                   },
                 ),
@@ -326,34 +383,6 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Color _getPredictionColor(String prediction) {
-    if (prediction.toLowerCase().contains('high')) {
-      return Colors.red[800]!;
-    } else if (prediction.toLowerCase().contains('medium')) {
-      return Colors.orange[800]!;
-    }
-    return Colors.yellow[800]!;
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Material(
-      shape: const CircleBorder(),
-      elevation: 4,
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white),
-        style: IconButton.styleFrom(
-          backgroundColor: color,
-          padding: const EdgeInsets.all(16),
-        ),
-        onPressed: onPressed,
       ),
     );
   }
