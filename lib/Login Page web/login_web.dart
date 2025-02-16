@@ -1,6 +1,8 @@
+import 'package:accident_hotspot/Functions/auth_func.dart';
 import 'package:accident_hotspot/Login%20Page%20web/Sign_Up_Web.dart';
 import 'package:accident_hotspot/Login%20Page/forgot.dart';
 import 'package:accident_hotspot/Maps/map_screen_web.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -17,6 +19,70 @@ class _LoginPageWebState extends State<LoginPageWeb> {
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
   bool isLoading = false;
+  String? errorMessage;
+
+  void login(String email, String password, BuildContext context) async {
+    setState(() {
+      errorMessage = null; // Clear any previous error
+    });
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        errorMessage = "Please enter email and password.";
+      });
+      return; // Exit the function if fields are empty
+    }
+
+    setState(() {
+      isLoading = true; // Start loading indicator
+    });
+
+    try {
+      final AuthFunc _auth = AuthFunc();
+      UserCredential? user = await _auth.signin(
+        email.trim(),
+        password,
+      );
+
+      if (user != null) {
+        print("Login successfully");
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MapScreenWeb()),
+        );
+      } else {
+        print("Login Failed: Incorrect email or password");
+        setState(() {
+          errorMessage = "Login Failed: Incorrect email or password";
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Error: ${e.code}");
+      setState(() {
+        if (e.code == 'user-not-found') {
+          errorMessage = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Wrong password provided for that user.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'The email address is badly formatted.';
+        } else if (e.code == 'user-disabled') {
+          errorMessage = 'This user has been disabled.';
+        } else {
+          errorMessage = "Login Failed.";
+        }
+      });
+    } catch (e) {
+      print("An unexpected error occurred: $e");
+      setState(() {
+        errorMessage = "An unexpected error occurred.";
+      });
+    } finally {
+      setState(() {
+        isLoading = false; // Stop loading indicator regardless of result
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +203,20 @@ class _LoginPageWebState extends State<LoginPageWeb> {
                           duration: Duration(milliseconds: 1200),
                           child: _buildPasswordField(accentColor),
                         ),
-                        SizedBox(height: 16),
+                        SizedBox(height: 8),
+                        // Display Error Message
+                        if (errorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              errorMessage!,
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        SizedBox(height: 8),
 
                         // Forgot Password
                         FadeInUp(
@@ -172,7 +251,10 @@ class _LoginPageWebState extends State<LoginPageWeb> {
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleLogin,
+                              onPressed: () {
+                                login(emailController.text,
+                                    passwordController.text, context);
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: accentColor,
                                 foregroundColor: Colors.white,
@@ -301,22 +383,5 @@ class _LoginPageWebState extends State<LoginPageWeb> {
         ),
       ),
     );
-  }
-
-  void _handleLogin() {
-    setState(() {
-      isLoading = true;
-    });
-
-    // Simulate login process
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false;
-      });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MapScreenWeb()),
-      );
-    });
   }
 }

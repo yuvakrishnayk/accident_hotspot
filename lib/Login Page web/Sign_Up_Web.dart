@@ -1,4 +1,6 @@
+import 'package:accident_hotspot/Functions/auth_func.dart';
 import 'package:accident_hotspot/Maps/Map_Screen_web.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +25,17 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  void Signup(String email, password) async {
+    final AuthFunc _auth = AuthFunc();
+    UserCredential? user = await _auth.signup(email, password);
+    if (user != null) {
+      print('User Register Successfully');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Registered successfully')));
+    } else {
+      print('User not Register Successfully');
+    }
+  }
 
   int age = 0;
   String? vehicleType;
@@ -358,14 +371,7 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
         if (value == null || value.isEmpty) {
           return 'Please enter a password';
         }
-        if (value.length < 8) {
-          return 'Password must be at least 8 characters';
-        }
-        if (!RegExp(
-                r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
-            .hasMatch(value)) {
-          return 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character';
-        }
+
         return null;
       },
     );
@@ -421,7 +427,10 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: ElevatedButton(
-        onPressed: _termsChecked ? _handleSubmit : null,
+        onPressed: () {
+          Signup(emailController.text, passwordController.text);
+          _handleSubmit();
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: accentColor,
           foregroundColor: Colors.white,
@@ -558,6 +567,7 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
           animType: AnimType.rightSlide,
           title: 'Success',
           desc: 'Registration completed successfully!',
+          width: MediaQuery.of(context).size.width * 0.4,
           btnOkOnPress: () {
             Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => MapScreenWeb()));

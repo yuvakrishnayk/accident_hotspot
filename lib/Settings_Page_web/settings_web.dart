@@ -1,3 +1,4 @@
+import 'package:accident_hotspot/Functions/auth_func.dart';
 import 'package:accident_hotspot/Settings_Page_web/helper_web.dart';
 import 'package:accident_hotspot/Settings_Page_web/notification_web_page.dart';
 import 'package:accident_hotspot/Settings_Page_web/profile_page_web.dart';
@@ -11,6 +12,10 @@ class SettingsPageWeb extends StatefulWidget {
 
   @override
   _SettingsPageWebState createState() => _SettingsPageWebState();
+  void logout() async {
+    AuthFunc auth = AuthFunc();
+    await auth.signOut();
+  }
 }
 
 class _SettingsPageWebState extends State<SettingsPageWeb> {
@@ -238,6 +243,7 @@ class _SettingsPageWebState extends State<SettingsPageWeb> {
       headerAnimationLoop: false,
       animType: AnimType.bottomSlide,
       title: 'Logout',
+      width: MediaQuery.of(context).size.width * 0.4,
       titleTextStyle: GoogleFonts.inter(
         fontSize: 24,
         fontWeight: FontWeight.w700,
@@ -257,7 +263,7 @@ class _SettingsPageWebState extends State<SettingsPageWeb> {
       btnOkText: "Logout",
       btnOkColor: Colors.red.shade600,
       btnOkOnPress: () {
-        Navigator.pop(context);
+        widget.logout();
       },
     ).show();
   }
