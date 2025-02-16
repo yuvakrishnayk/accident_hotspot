@@ -6,5 +6,25 @@
       "**/.*",
       "**/node_modules/**"
     ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "accidentpred-2d2d6",
+          "appId": "1:488540644422:android:d9bdac7097af659cd45647",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "accidentpred-2d2d6",
+          "configurations": {
+            "android": "1:488540644422:android:d9bdac7097af659cd45647",
+            "web": "1:488540644422:web:6e647b286ca225dad45647"
+          }
+        }
+      }
+    }
   }
 }

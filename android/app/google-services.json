@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "488540644422",
+    "project_id": "accidentpred-2d2d6",
+    "storage_bucket": "accidentpred-2d2d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488540644422:android:d9bdac7097af659cd45647",
+        "android_client_info": {
+          "package_name": "com.example.accident_hotspot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpVj5eUNzIPCIIonPA2fPTQEDsCzX9j4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

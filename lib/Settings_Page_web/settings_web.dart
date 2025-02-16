@@ -3,8 +3,8 @@ import 'package:accident_hotspot/Settings_Page_web/notification_web_page.dart';
 import 'package:accident_hotspot/Settings_Page_web/profile_page_web.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart'; // Animation Package (install: `flutter pub add animate_do`)
-import 'package:awesome_dialog/awesome_dialog.dart'; // Beautiful Dialogs (install: `flutter pub add awesome_dialog`)
-import 'package:google_fonts/google_fonts.dart'; // Google Fonts
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingsPageWeb extends StatefulWidget {
   const SettingsPageWeb({super.key});
