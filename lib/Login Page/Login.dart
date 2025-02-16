@@ -7,6 +7,8 @@ class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  LoginPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final Color themeColor = Color(0xFFA1E6E7); // Theme color
@@ -129,11 +131,6 @@ class LoginPage extends StatelessWidget {
                         builder: (context) => MapScreen(),
                       ));
                     },
-                    child: Text(
-                      'Login',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
                       foregroundColor: Colors.white,
@@ -143,6 +140,11 @@ class LoginPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 5,
+                    ),
+                    child: Text(
+                      'Login',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
                   SizedBox(height: 20),

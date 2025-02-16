@@ -7,6 +7,8 @@ class SettingsPage extends StatelessWidget {
   final Color themeColor = const Color(0xFFA1E6E7);
   final Color accentColor = const Color(0xFF007B83);
 
+  const SettingsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

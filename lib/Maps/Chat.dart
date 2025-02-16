@@ -180,7 +180,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                         .colorScheme
                         .primaryContainer
                         .withOpacity(0.2),
-                    Theme.of(context).colorScheme.background,
+                    Theme.of(context).colorScheme.surface,
                   ],
                 ),
               ),
@@ -267,7 +267,7 @@ class _ChatBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isUser
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.surfaceVariant,
+                    : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(20),
                   topRight: const Radius.circular(20),
@@ -430,7 +430,7 @@ class _ChatInput extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,

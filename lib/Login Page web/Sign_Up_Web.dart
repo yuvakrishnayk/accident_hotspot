@@ -6,9 +6,11 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:animate_do/animate_do.dart'; // Animation (install: `flutter pub add animate_do`)
 import 'package:awesome_dialog/awesome_dialog.dart'; //Beautiful Dialogs
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart'; //Phone Number Formatting (install: `flutter pub add mask_text_input_formatter`)
-// Terms and Conditions
+import 'package:google_fonts/google_fonts.dart'; // Google Fonts (install: `flutter pub add google_fonts`)
 
 class SignUpPageWeb extends StatefulWidget {
+  const SignUpPageWeb({super.key});
+
   @override
   _SignUpPageWebState createState() => _SignUpPageWebState();
 }
@@ -40,7 +42,6 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
 
   @override
   Widget build(BuildContext context) {
-    final Color themeColor = Color(0xFFA1E6E7);
     final Color accentColor = Color(0xFF007B83);
 
     // Get the screen width
@@ -50,282 +51,390 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
     bool isMobile = screenWidth < 600;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [themeColor, Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: FadeInUp(
-                  child: Container(
-                    constraints: BoxConstraints(maxWidth: 800),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.person_add_alt_1,
-                              size: 80,
-                              color: accentColor,
+      body: Row(
+        children: [
+          // Left Panel - Hero Section (Only visible on desktop)
+          if (!isMobile)
+            Expanded(
+              flex: 5,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  image: DecorationImage(
+                    image: NetworkImage(
+                        'https://source.unsplash.com/random/?safety,road'),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      accentColor.withOpacity(0.7),
+                      BlendMode.overlay,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: FadeIn(
+                    duration: Duration(milliseconds: 1000),
+                    child: Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Join SAFORA Today',
+                            style: GoogleFonts.inter(
+                              fontSize: 42,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.2,
                             ),
-                            SizedBox(height: 20),
-                            Text(
-                              'Create Your Account',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w600,
-                                color: accentColor,
-                              ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            'Help us make roads safer by being part of our community.',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              color: Colors.white.withOpacity(0.9),
+                              height: 1.5,
                             ),
-                            SizedBox(height: 30),
-
-                            // Wrap form fields in rows for desktop layout
-                            Wrap(
-                              spacing: 20,
-                              runSpacing: 16,
-                              alignment: WrapAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: TextFormField(
-                                    controller: nameController,
-                                    decoration: _inputDecoration(
-                                        'Name',
-                                        'Enter your name',
-                                        Icons.person,
-                                        accentColor),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter your name';
-                                      }
-                                      if (!RegExp(r'^[a-zA-Z\s]+$')
-                                          .hasMatch(value)) {
-                                        return 'Name can only contain letters and spaces';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: TextFormField(
-                                    controller: dobController,
-                                    decoration: _inputDecoration(
-                                        'Date of Birth',
-                                        'YYYY-MM-DD',
-                                        Icons.calendar_today,
-                                        accentColor),
-                                    readOnly: true,
-                                    onTap: () => _selectDate(context),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please select your date of birth';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: TextFormField(
-                                    controller: emailController,
-                                    decoration: _inputDecoration(
-                                        'Email',
-                                        'e.g., xxx@gmail.com',
-                                        Icons.email,
-                                        accentColor),
-                                    keyboardType: TextInputType.emailAddress,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter your email';
-                                      }
-                                      if (!isEmail(value)) {
-                                        return 'Please enter a valid email';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: TextFormField(
-                                    controller: phoneController,
-                                    decoration: _inputDecoration(
-                                        'Phone Number',
-                                        '(123) 456-7890',
-                                        Icons.phone,
-                                        accentColor),
-                                    keyboardType: TextInputType.phone,
-                                    inputFormatters: [phoneFormatter],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter your phone number';
-                                      }
-                                      if (value.length < 14) {
-                                        return 'Please enter a valid 10-digit phone number';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: DropdownButtonFormField<String>(
-                                    value: vehicleType,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        vehicleType = value;
-                                      });
-                                    },
-                                    items: ['Car', 'Bike', 'Truck']
-                                        .map((type) => DropdownMenuItem(
-                                              value: type,
-                                              child: Text(type),
-                                            ))
-                                        .toList(),
-                                    decoration: _inputDecoration(
-                                        'Vehicle Type',
-                                        null,
-                                        Icons.directions_car,
-                                        accentColor),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please select a vehicle type';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: TextFormField(
-                                    controller: passwordController,
-                                    decoration: _passwordDecoration(
-                                        'Password',
-                                        'Enter a strong password',
-                                        accentColor,
-                                        isPasswordVisible, () {
-                                      setState(() {
-                                        isPasswordVisible = !isPasswordVisible;
-                                      });
-                                    }),
-                                    obscureText: !isPasswordVisible,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter a password';
-                                      }
-                                      if (value.length < 8) {
-                                        return 'Password must be at least 8 characters';
-                                      }
-                                      if (!RegExp(
-                                              r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
-                                          .hasMatch(value)) {
-                                        return 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isMobile ? double.infinity : 350,
-                                  child: TextFormField(
-                                    controller: confirmPasswordController,
-                                    decoration: _passwordDecoration(
-                                        'Confirm Password',
-                                        'Re-enter your password',
-                                        accentColor,
-                                        isConfirmPasswordVisible, () {
-                                      setState(() {
-                                        isConfirmPasswordVisible =
-                                            !isConfirmPasswordVisible;
-                                      });
-                                    }),
-                                    obscureText: !isConfirmPasswordVisible,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please confirm your password';
-                                      }
-                                      if (value != passwordController.text) {
-                                        return 'Passwords do not match';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 16),
-
-                            // Terms and Conditions Checkbox
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Checkbox(
-                                  value: _termsChecked,
-                                  activeColor: accentColor,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _termsChecked = value!;
-                                    });
-                                  },
-                                ),
-                                GestureDetector(
-                                  onTap: () => _showTermsDialog(context),
-                                  child: Text(
-                                    'I agree to the Terms and Conditions',
-                                    style: TextStyle(color: accentColor),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 32),
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: ElevatedButton(
-                                onPressed: _termsChecked ? _handleSubmit : null,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 40, vertical: 16),
-                                  child: Text(
-                                    'Register',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: accentColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  disabledBackgroundColor:
-                                      Colors.grey[400], // Disabled button color
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
             ),
+
+          // Right Panel - Sign Up Form
+          Expanded(
+            flex: 6,
+            child: Container(
+              color: Colors.transparent,
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: NeverScrollableScrollPhysics(),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: isMobile ? screenWidth * 0.9 : 800,
+                    ),
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header Section
+                          Center(
+                            child: Column(
+                              children: [
+                                SizedBox(height: 60),
+                                Text(
+                                  'Create Your Account',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Join our community of safe drivers',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 48),
+
+                          // Form Fields
+                          Wrap(
+                            spacing: 24,
+                            runSpacing: 24,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildNameField(accentColor),
+                              ),
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildDOBField(accentColor),
+                              ),
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildEmailField(accentColor),
+                              ),
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildPhoneField(accentColor),
+                              ),
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildVehicleTypeField(accentColor),
+                              ),
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildPasswordField(accentColor),
+                              ),
+                              _buildFormField(
+                                width: isMobile ? double.infinity : 350,
+                                child: _buildConfirmPasswordField(accentColor),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 32),
+
+                          // Terms and Privacy
+                          Center(
+                            child: _buildTermsAndPrivacy(accentColor),
+                          ),
+
+                          SizedBox(height: 32),
+
+                          // Sign Up Button
+                          Center(
+                            child: _buildSignUpButton(accentColor),
+                          ),
+
+                          SizedBox(height: 24),
+
+                          // Login Link
+                          Center(
+                            child: TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                'Already have an account? Sign in',
+                                style: GoogleFonts.inter(
+                                  color: accentColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormField({required double width, required Widget child}) {
+    return SizedBox(
+      width: width,
+      child: child,
+    );
+  }
+
+  Widget _buildNameField(Color accentColor) {
+    return TextFormField(
+      controller: nameController,
+      decoration: _inputDecoration(
+          'Name', 'Enter your name', Icons.person, accentColor),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your name';
+        }
+        if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
+          return 'Name can only contain letters and spaces';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDOBField(Color accentColor) {
+    return TextFormField(
+      controller: dobController,
+      decoration: _inputDecoration(
+          'Date of Birth', 'YYYY-MM-DD', Icons.calendar_today, accentColor),
+      readOnly: true,
+      onTap: () => _selectDate(context),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select your date of birth';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildEmailField(Color accentColor) {
+    return TextFormField(
+      controller: emailController,
+      decoration: _inputDecoration(
+          'Email', 'e.g., xxx@gmail.com', Icons.email, accentColor),
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your email';
+        }
+        if (!isEmail(value)) {
+          return 'Please enter a valid email';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPhoneField(Color accentColor) {
+    return TextFormField(
+      controller: phoneController,
+      decoration: _inputDecoration(
+          'Phone Number', '(123) 456-7890', Icons.phone, accentColor),
+      keyboardType: TextInputType.phone,
+      inputFormatters: [phoneFormatter],
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your phone number';
+        }
+        if (value.length < 14) {
+          return 'Please enter a valid 10-digit phone number';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildVehicleTypeField(Color accentColor) {
+    return DropdownButtonFormField<String>(
+      value: vehicleType,
+      onChanged: (value) {
+        setState(() {
+          vehicleType = value;
+        });
+      },
+      items: ['Car', 'Bike', 'Truck']
+          .map((type) => DropdownMenuItem(
+                value: type,
+                child: Text(type),
+              ))
+          .toList(),
+      decoration: _inputDecoration(
+          'Vehicle Type', null, Icons.directions_car, accentColor),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select a vehicle type';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPasswordField(Color accentColor) {
+    return TextFormField(
+      controller: passwordController,
+      decoration: _passwordDecoration(
+          'Password', 'Enter a strong password', accentColor, isPasswordVisible,
+          () {
+        setState(() {
+          isPasswordVisible = !isPasswordVisible;
+        });
+      }),
+      obscureText: !isPasswordVisible,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter a password';
+        }
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters';
+        }
+        if (!RegExp(
+                r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
+            .hasMatch(value)) {
+          return 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildConfirmPasswordField(Color accentColor) {
+    return TextFormField(
+      controller: confirmPasswordController,
+      decoration: _passwordDecoration('Confirm Password',
+          'Re-enter your password', accentColor, isConfirmPasswordVisible, () {
+        setState(() {
+          isConfirmPasswordVisible = !isConfirmPasswordVisible;
+        });
+      }),
+      obscureText: !isConfirmPasswordVisible,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please confirm your password';
+        }
+        if (value != passwordController.text) {
+          return 'Passwords do not match';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildTermsAndPrivacy(Color accentColor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Checkbox(
+          value: _termsChecked,
+          activeColor: accentColor,
+          onChanged: (bool? value) {
+            setState(() {
+              _termsChecked = value!;
+            });
+          },
+        ),
+        GestureDetector(
+          onTap: () => _showTermsDialog(context),
+          child: Text(
+            'I agree to the Terms and Conditions',
+            style: GoogleFonts.inter(color: accentColor),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSignUpButton(Color accentColor) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: ElevatedButton(
+        onPressed: _termsChecked ? _handleSubmit : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: accentColor,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          disabledBackgroundColor: Colors.grey[400], // Disabled button color
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+          child: Text(
+            'Register',
+            style: GoogleFonts.inter(fontSize: 18),
           ),
         ),
       ),
@@ -453,7 +562,7 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
             Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => MapScreenWeb()));
           },
-        )..show();
+        ).show();
       });
     } else {
       //Show Flushbar error

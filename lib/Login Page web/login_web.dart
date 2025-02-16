@@ -1,12 +1,13 @@
-import 'package:accident_hotspot/Login%20Page%20web/forgot_web.dart';
-import 'package:accident_hotspot/Login%20Page%20web/sign_up_web.dart';
-import 'package:accident_hotspot/Maps/Map_Screen_web.dart';
+import 'package:accident_hotspot/Login%20Page%20web/Sign_Up_Web.dart';
+import 'package:accident_hotspot/Login%20Page/forgot.dart';
+import 'package:accident_hotspot/Maps/map_screen_web.dart';
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart'; // Animation Package (install: `flutter pub add animate_do`)
-import 'package:validators/validators.dart'; // Form Validation (install: `flutter pub add validators`)
-import 'package:another_flushbar/flushbar.dart'; // Better Snackbars(install: `flutter pub add another_flushbar`)
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
 
 class LoginPageWeb extends StatefulWidget {
+  const LoginPageWeb({super.key});
+
   @override
   _LoginPageWebState createState() => _LoginPageWebState();
 }
@@ -14,294 +15,308 @@ class LoginPageWeb extends StatefulWidget {
 class _LoginPageWebState extends State<LoginPageWeb> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool _obscurePassword = true; // For password visibility toggle
-  final _formKey = GlobalKey<FormState>(); //Key For Validating Form
-  bool _isLoading = false; // For indicating loading state
+  bool isPasswordVisible = false;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    final Color themeColor = Color(0xFFA1E6E7); // Theme color
-    final Color accentColor =
-        Color(0xFF007B83); // Darker accent for links and text
-
-    // Get screen size
-    final screenWidth = MediaQuery.of(context).size.width;
+    final Color accentColor = Color(0xFF007B83);
+    final screenSize = MediaQuery.of(context).size;
+    bool isMobile = screenSize.width < 960;
 
     return Scaffold(
-      body: SizedBox.expand(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [themeColor, Colors.white],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Center(
-            child: SingleChildScrollView(
+      body: Row(
+        children: [
+          // Left Panel - Hero Section (Only visible on desktop)
+          if (!isMobile)
+            Expanded(
+              flex: 6,
               child: Container(
-                width: screenWidth > 600 ? 500 : screenWidth * 0.9,
-                padding: EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 5),
+                  color: accentColor,
+                  image: DecorationImage(
+                    image: NetworkImage(
+                        'https://source.unsplash.com/random/?road,safety'),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      accentColor.withOpacity(0.7),
+                      BlendMode.overlay,
                     ),
-                  ],
+                  ),
                 ),
-                child: Form(
-                  key: _formKey, // Set the Form Key
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      FadeInDown(
-                        duration: Duration(milliseconds: 1100),
-                        child: Image.network(
-                          'https://i.ibb.co/dwBJ16GL/iconn-removebg-preview.png',
-                          scale: 2,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      FadeIn(
-                        delay: Duration(milliseconds: 500),
-                        child: Text(
-                          'S A F O R A',
-                          style: TextStyle(
-                            fontSize: screenWidth > 600 ? 24 : 22,
-                            fontWeight: FontWeight.w600,
-                            color: accentColor,
+                child: Center(
+                  child: FadeIn(
+                    duration: Duration(milliseconds: 1000),
+                    child: Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Welcome to SAFORA',
+                            style: GoogleFonts.inter(
+                              fontSize: 42,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.2,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 12,
-                      ),
-                      FadeIn(
-                        delay: Duration(milliseconds: 500),
-                        child: Text(
-                          'Accident Hotspot and Prevention',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            color: accentColor,
+                          SizedBox(height: 20),
+                          Text(
+                            'Your trusted companion for safer roads and accident prevention.',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              color: Colors.white.withOpacity(0.9),
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
+                        ],
                       ),
-                      SizedBox(height: 40),
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
-                      // Email TextField (With Validation)
-                      FadeInLeft(
-                        duration: Duration(milliseconds: 600),
-                        child: TextFormField(
-                          controller: emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            hintText: 'Enter your email address',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: Icon(Icons.email, color: accentColor),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: accentColor, width: 2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            if (!isEmail(value)) {
-                              return 'Please enter a valid email address';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 16),
-
-                      // Password TextField (With Validation & Visibility Toggle)
-                      FadeInRight(
-                        duration: Duration(milliseconds: 600),
-                        child: TextFormField(
-                          controller: passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            hintText: 'Enter your password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: Icon(Icons.lock, color: accentColor),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: accentColor,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: accentColor, width: 2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          obscureText: _obscurePassword,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 16),
-
-                      // Forgot Password Link (Animated)
-                      FadeIn(
-                        delay: Duration(milliseconds: 700),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ForgottenPasswordPageWeb()),
-                              );
-                            },
-                            child: Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                color: accentColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-
-                      // Login Button (Animated, with Loading State)
-                      FadeInUp(
-                        duration: Duration(milliseconds: 600),
-                        child: ElevatedButton(
-                          onPressed: _isLoading
-                              ? null // Disable button when loading
-                              : () {
-                                  if (_formKey.currentState!.validate()) {
-                                    // Form is valid
-                                    setState(() {
-                                      _isLoading = true; //Show Loading state
-                                    });
-                                    // Simulate login process
-                                    Future.delayed(Duration(seconds: 2), () {
-                                      setState(() {
-                                        _isLoading = false; // Hide loading
-                                      });
-                                      Navigator.of(context).pushReplacement(
-                                        // Prevents back button
-                                        MaterialPageRoute(
-                                          builder: (context) => MapScreenWeb(),
-                                        ),
-                                      );
-                                    });
-                                  } else {
-                                    // Form is invalid
-                                    Flushbar(
-                                      message:
-                                          "Please correct the errors in the form.",
-                                      duration: Duration(seconds: 3),
-                                      icon: Icon(
-                                        Icons.error_outline,
-                                        color: Colors.red,
-                                      ),
-                                      backgroundColor: Colors.grey[800]!,
-                                      flushbarPosition: FlushbarPosition.TOP,
-                                    ).show(context);
-                                  }
-                                },
-                          child: _isLoading
-                              ? SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                )
-                              : Text(
-                                  'Login',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: accentColor,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 5,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-
-                      // Sign Up Link (Animated)
-                      FadeIn(
-                        delay: Duration(milliseconds: 800),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignUpPageWeb()),
-                            );
-                          },
+          // Right Panel - Login Form
+          Expanded(
+            flex: isMobile ? 1 : 4,
+            child: Container(
+              color: Colors.white,
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: 400),
+                    padding: EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 40),
+                        FadeInDown(
+                          duration: Duration(milliseconds: 1000),
                           child: Text(
-                            'Don\'t have an account? Sign Up',
-                            style: TextStyle(
-                              color: accentColor,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.underline,
+                            'Sign in to your account',
+                            style: GoogleFonts.inter(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ),
-                      ),
+                        SizedBox(height: 8),
+                        FadeInDown(
+                          duration: Duration(milliseconds: 1000),
+                          child: Text(
+                            'Welcome back! Please enter your details',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 32),
 
-                      SizedBox(height: 10),
+                        // Email Field
+                        FadeInUp(
+                          duration: Duration(milliseconds: 1000),
+                          child: _buildTextField(
+                            controller: emailController,
+                            label: 'Email',
+                            hint: 'Enter your email',
+                            icon: Icons.email_outlined,
+                            accentColor: accentColor,
+                          ),
+                        ),
+                        SizedBox(height: 16),
 
-                      //Animated decoration
-                    ],
+                        // Password Field
+                        FadeInUp(
+                          duration: Duration(milliseconds: 1200),
+                          child: _buildPasswordField(accentColor),
+                        ),
+                        SizedBox(height: 16),
+
+                        // Forgot Password
+                        FadeInUp(
+                          duration: Duration(milliseconds: 1400),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ForgottenPasswordPage()),
+                                );
+                              },
+                              child: Text(
+                                'Forgot password?',
+                                style: GoogleFonts.inter(
+                                  color: accentColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+
+                        // Login Button
+                        FadeInUp(
+                          duration: Duration(milliseconds: 1600),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: isLoading ? null : _handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: accentColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: isLoading
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Sign in',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+
+                        // Sign Up Link
+                        FadeInUp(
+                          duration: Duration(milliseconds: 1800),
+                          child: Center(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignUpPageWeb()),
+                                );
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  text: "Don't have an account? ",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.black54,
+                                    fontSize: 14,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: 'Sign up',
+                                      style: GoogleFonts.inter(
+                                        color: accentColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    required Color accentColor,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon, color: accentColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: accentColor, width: 2),
         ),
       ),
     );
+  }
+
+  Widget _buildPasswordField(Color accentColor) {
+    return TextFormField(
+      controller: passwordController,
+      obscureText: !isPasswordVisible,
+      decoration: InputDecoration(
+        labelText: 'Password',
+        hintText: 'Enter your password',
+        prefixIcon: Icon(Icons.lock_outline, color: accentColor),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+            color: accentColor,
+          ),
+          onPressed: () {
+            setState(() {
+              isPasswordVisible = !isPasswordVisible;
+            });
+          },
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: accentColor, width: 2),
+        ),
+      ),
+    );
+  }
+
+  void _handleLogin() {
+    setState(() {
+      isLoading = true;
+    });
+
+    // Simulate login process
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false;
+      });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MapScreenWeb()),
+      );
+    });
   }
 }

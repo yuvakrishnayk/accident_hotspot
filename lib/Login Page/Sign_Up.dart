@@ -2,6 +2,8 @@ import 'package:accident_hotspot/Maps/Map_Screen.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -250,7 +252,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       );
                     }
                   },
-                  child: Text('Register'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accentColor,
                     foregroundColor: Colors.white,
@@ -259,6 +260,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: Text('Register'),
                 ),
               ],
             ),

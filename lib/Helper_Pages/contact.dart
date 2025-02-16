@@ -1,88 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // For SVG icons
-import 'package:validators/validators.dart'; // For more robust email validation (install: `flutter pub add validators`)
-import 'package:another_flushbar/flushbar.dart'; // For better snackbar-like messages (install: `flutter pub add another_flushbar`)
-import 'package:flutter/services.dart'; // For Clipboard
-import 'package:share_plus/share_plus.dart'; // For sharing functionality (install: `flutter pub add share_plus`)
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:validators/validators.dart';
+import 'package:another_flushbar/flushbar.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 class ContactSupportPage extends StatelessWidget {
+  const ContactSupportPage({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final isWeb = UniversalPlatform.isWeb;
+    final horizontalPadding =
+        isWeb ? screenWidth * 0.1 : 16.0; // Add padding on web
+
+    // Define Colors from the screenshot
+    const Color appBarColor = Colors.teal; // Teal-ish AppBar color
+    const Color tileBackgroundColor =
+        Color(0xFFD3F0EE); // Light Teal Background
+    // Dark Text Color
+    const Color textColorLight = Colors.black54; // Light Text Color
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Contact Support'),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back, color: Colors.white)),
+        title: isWeb ? null : Text('Contact Support'), // Remove title on web
+        backgroundColor: appBarColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.share),
+            icon: Icon(Icons.share, color: Colors.white),
             onPressed: () {
               _shareApp();
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Need Assistance?',
-                style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor),
+      backgroundColor: tileBackgroundColor,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 1200), // max width for web
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding, vertical: 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Need Assistance?',
+                    style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: appBarColor), // Teal
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'We are committed to providing exceptional support. Let us know how we can help!',
+                    style: TextStyle(
+                        fontSize: 16, color: textColorLight), // light Grey
+                  ),
+                  SizedBox(height: 24),
+                  SectionTitle(title: 'Contact Information'),
+                  SizedBox(height: 8), // Add gap here
+                  ContactInfoTile(
+                    icon: Icons.email,
+                    title: 'Email Support',
+                    subtitle: 'support@accidenthotspotapp.com',
+                    onTap: () {
+                      _launchURL(
+                          'mailto:support@accidenthotspotapp.com', context);
+                    },
+                    trailing: IconButton(
+                        icon: Icon(Icons.copy),
+                        onPressed: () {
+                          _copyToClipboard('support@accidenthotspotapp.com',
+                              context, "Email Copied!");
+                        }),
+                  ),
+                  SizedBox(height: 8), // Add gap here
+                  ContactInfoTile(
+                    icon: Icons.phone,
+                    title: 'Phone Support',
+                    subtitle: '044-450-54367',
+                    onTap: () {
+                      _launchURL('tel:+044-450-54367', context);
+                    },
+                    trailing: IconButton(
+                        icon: Icon(Icons.copy),
+                        onPressed: () {
+                          _copyToClipboard(
+                              '044-450-54367', context, "Phone Number Copied!");
+                        }),
+                  ),
+                  SizedBox(height: 24),
+                  SectionTitle(title: 'Stay Connected'),
+                  SocialMediaRow(),
+                  SizedBox(height: 24),
+                  SectionTitle(title: 'Send Us a Message'),
+                  ContactForm(),
+                  SizedBox(height: 32),
+                  Center(
+                      child: Text(
+                    'Accident Hotspot App - v1.0',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  )) // Example app version
+                ],
               ),
-              SizedBox(height: 8),
-              Text(
-                'We are committed to providing exceptional support.  Let us know how we can help!',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-              ),
-              SizedBox(height: 24),
-              SectionTitle(title: 'Contact Information'),
-              ContactInfoTile(
-                icon: Icons.email,
-                title: 'Email Support',
-                subtitle: 'support@accidenthotspotapp.com',
-                onTap: () {
-                  _launchURL('mailto:support@accidenthotspotapp.com', context);
-                },
-                trailing: IconButton(
-                    icon: Icon(Icons.copy),
-                    onPressed: () {
-                      _copyToClipboard('support@accidenthotspotapp.com',
-                          context, "Email Copied!");
-                    }),
-              ),
-              ContactInfoTile(
-                icon: Icons.phone,
-                title: 'Phone Support',
-                subtitle: '044-450-54367',
-                onTap: () {
-                  _launchURL('tel:+044-450-54367', context);
-                },
-                trailing: IconButton(
-                    icon: Icon(Icons.copy),
-                    onPressed: () {
-                      _copyToClipboard(
-                          '044-450-54367', context, "Phone Number Copied!");
-                    }),
-              ),
-              SizedBox(height: 24),
-              SectionTitle(title: 'Stay Connected'),
-              SocialMediaRow(),
-              SizedBox(height: 24),
-              SectionTitle(title: 'Send Us a Message'),
-              ContactForm(),
-              SizedBox(height: 32),
-              Center(
-                  child: Text(
-                'Accident Hotspot App - v1.0',
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-              )) // Example app version
-            ],
+            ),
           ),
         ),
       ),
@@ -129,7 +162,7 @@ class ContactSupportPage extends StatelessWidget {
 class SectionTitle extends StatelessWidget {
   final String title;
 
-  const SectionTitle({Key? key, required this.title}) : super(key: key);
+  const SectionTitle({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -149,45 +182,61 @@ class ContactInfoTile extends StatelessWidget {
   final Widget? trailing;
 
   const ContactInfoTile(
-      {Key? key,
+      {super.key,
       required this.icon,
       required this.title,
       required this.subtitle,
       required this.onTap,
-      this.trailing})
-      : super(key: key);
+      this.trailing});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).primaryColor),
-      title: Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
-      subtitle: Text(subtitle),
-      onTap: onTap,
-      trailing: trailing,
+    return Container(
+      // Removed White Box
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Color(0xFF16A388)), // Teal Icon
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
+        subtitle: Text(subtitle),
+        onTap: onTap,
+        trailing: trailing,
+      ),
     );
   }
 }
 
 class SocialMediaRow extends StatelessWidget {
+  const SocialMediaRow({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center, // center social icons
       children: [
         IconButton(
-          icon: Icon(Icons.facebook),
+          icon: Icon(
+            Icons.facebook,
+            color: Colors.blue,
+          ), // Facebook Blue
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.camera_alt,
+            color: Colors.blue,
+          ), // Changed to a more appropriate icon, use twitters blue if you could get that
           onPressed: () {
-            
+            // Replace with actual Twitter link
           },
         ),
         IconButton(
-          icon: Icon(Icons.camera_alt), // Changed to a more appropriate icon
-          onPressed: () {
-// Replace with actual Twitter link
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.linked_camera), //Use Icons.linkedin
+          icon: Icon(
+            Icons.linked_camera,
+            color: Colors.blue,
+          ), //Use Icons.linkedin, LinkedIn blue
           onPressed: () {
             // Replace with actual LinkedIn link
           },
@@ -202,8 +251,7 @@ class SocialMediaIconButton extends StatelessWidget {
   final String url;
 
   const SocialMediaIconButton(
-      {Key? key, required this.iconPath, required this.url})
-      : super(key: key);
+      {super.key, required this.iconPath, required this.url});
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +285,8 @@ class SocialMediaIconButton extends StatelessWidget {
 }
 
 class ContactForm extends StatefulWidget {
+  const ContactForm({super.key});
+
   @override
   _ContactFormState createState() => _ContactFormState();
 }
@@ -314,6 +364,7 @@ class _ContactFormState extends State<ContactForm> {
           SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF16A388),
               padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               textStyle: TextStyle(fontSize: 18),
             ),
@@ -340,7 +391,7 @@ class _ContactFormState extends State<ContactForm> {
                 });
               }
             },
-            child: Text('Send Message'),
+            child: Text('Send Message', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -356,23 +407,26 @@ class CustomTextFormField extends StatelessWidget {
   final int? maxLines;
 
   const CustomTextFormField(
-      {Key? key,
+      {super.key,
       required this.labelText,
       this.validator,
       this.onSaved,
       this.keyboardType,
-      this.maxLines})
-      : super(key: key);
+      this.maxLines});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white, // White Background
         labelText: labelText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
         focusedBorder: OutlineInputBorder(
           borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              BorderSide(color: Color(0xFF16A388), width: 2.0), // Teal Border
           borderRadius: BorderRadius.circular(12),
         ),
       ),

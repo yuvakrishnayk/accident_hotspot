@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import for launching URLs
+import 'package:url_launcher/url_launcher.dart';
+import 'package:universal_platform/universal_platform.dart'; // Import for platform detection
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -7,94 +8,140 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600; // Adjust breakpoint as needed
+    final isSmallScreen = screenWidth < 600;
+    final isWeb = UniversalPlatform.isWeb;
+
+    // Define a consistent palette for a cohesive look - MODIFIED
+    const Color primaryColor = Color(0xFF00A896); // Teal-ish Blue
+    const Color secondaryColor =
+        Color(0xFF00A896); // Keep for consistency, could repurpose
+    const Color textColorDark =
+        Color(0xFF000000); // Almost Black for readability
+    const Color textColorLight = Color(0xFF808080); // Medium Gray
+    const Color backgroundColor = Color(0xFFD3F0EE); // Light Mint Green
+    const Color surfaceColor = Colors.white; // White for cards/surfaces
+
+    // Adjust padding and other values for web view
+    final horizontalPadding =
+        isWeb ? screenWidth * 0.1 : 16.0; // Add padding on web
+    final appBarElevation =
+        isWeb ? 0.0 : 4.0; // Remove shadow on web, add on mobile
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        title: const Text(
-          'About AI Hotspot Prediction',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )),
+        backgroundColor: Colors.teal,
+        elevation: appBarElevation, // Control shadow visibility
+        iconTheme: IconThemeData(color: textColorDark), // Dark back arrow
+        titleTextStyle:
+            TextStyle(color: textColorDark, fontSize: 20), // Dark title
       ),
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Animated App Title
-              const Center(child: AnimatedAppTitle()),
-              const SizedBox(height: 16),
+      backgroundColor: backgroundColor,
+      body: Center(
+        // Centering for larger screens
+        child: ConstrainedBox(
+          // Limit the width on larger screens
+          constraints: BoxConstraints(
+              maxWidth: 1200), // Max width for comfortable reading
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Animated App Title (modified color)
+                Center(
+                    child: AnimatedAppTitle(
+                        primaryColor: primaryColor, isWeb: isWeb)),
+                SizedBox(height: 16),
 
-              // Introduction with Emphasis
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: isSmallScreen ? 16 : 18,
-                    color: Colors.black87,
-                    height: 1.4, // Improved readability
-                  ),
-                  children: [
-                    const TextSpan(
-                        text:
-                            'Our mission is to proactively '), // Changed to a mission statement
-                    TextSpan(
-                      text: 'eliminate traffic accidents',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade700, // Emphasize key phrase
-                      ),
+                // Introduction with Emphasis (color change)
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 16 : 18,
+                      color: textColorDark,
+                      height: 1.4,
                     ),
-                    const TextSpan(
-                        text:
-                            '. This app leverages cutting-edge AI to predict accident hotspots, giving you the power to make informed decisions and drive safer.'),
-                  ],
+                    children: [
+                      const TextSpan(text: 'Our mission is to proactively '),
+                      TextSpan(
+                        text: 'eliminate traffic accidents',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: secondaryColor, // Changed emphasis color
+                        ),
+                      ),
+                      const TextSpan(
+                          text:
+                              '. This app leverages cutting-edge AI to predict accident hotspots, giving you the power to make informed decisions and drive safer.'),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                SizedBox(height: 24),
 
-              // How it Works - More Engaging
-              const SectionTitle(title: 'How It Works: The AI in Action'),
-              const SizedBox(height: 12),
+                // How it Works - More Engaging (color change)
+                SectionTitle(
+                    title: 'How It Works: The AI in Action',
+                    color: primaryColor),
+                SizedBox(height: 12),
 
-              Text(
-                'Our system intelligently processes data from a multitude of sources:',
-                style: TextStyle(
-                    fontSize: isSmallScreen ? 15 : 16, color: Colors.black54),
-              ),
-              const SizedBox(height: 8),
-              const DataSourcesList(),
+                Text(
+                  'Our system intelligently processes data from a multitude of sources:',
+                  style: TextStyle(
+                      fontSize: isSmallScreen ? 15 : 16, color: textColorLight),
+                ),
+                SizedBox(height: 8),
+                DataSourcesList(
+                    primaryColor: primaryColor,
+                    textColorLight: textColorLight,
+                    surfaceColor: surfaceColor, // Pass surface color
+                    isWeb: isWeb),
 
-              const SizedBox(height: 24),
+                SizedBox(height: 24),
 
-              // Key Features - Visually Distinct and Engaging
-              const SectionTitle(title: 'Key Features: Your Safety Toolkit'),
-              const SizedBox(height: 12),
-              const KeyFeaturesList(),
+                // Key Features - Visually Distinct and Engaging (color change)
+                SectionTitle(
+                    title: 'Key Features: Your Safety Toolkit',
+                    color: primaryColor),
+                SizedBox(height: 12),
+                KeyFeaturesList(
+                    primaryColor: primaryColor,
+                    textColorLight: textColorLight,
+                    surfaceColor: surfaceColor, // Pass surface color
+                    isWeb: isWeb),
 
-              const SizedBox(height: 24),
+                SizedBox(height: 24),
 
-              // Innovation Section
-              const SectionTitle(title: 'The Innovation Behind Our App'),
-              const SizedBox(height: 12),
-              const InnovationDescription(),
+                // Innovation Section (color change)
+                SectionTitle(
+                    title: 'The Innovation Behind Our App',
+                    color: primaryColor),
+                SizedBox(height: 12),
+                InnovationDescription(
+                    textColorLight: textColorLight, isWeb: isWeb),
 
-              const SizedBox(height: 24),
+                SizedBox(height: 24),
 
-              // Contact Us - Easier Interaction
-              const SectionTitle(
-                  title: 'Get in Touch - We Value Your Feedback'),
-              const SizedBox(height: 12),
-              const ContactUsSection(),
+                // Contact Us - Easier Interaction (color change)
+                SectionTitle(
+                    title: 'Get in Touch - We Value Your Feedback',
+                    color: primaryColor),
+                SizedBox(height: 12),
+                ContactUsSection(primaryColor: primaryColor, isWeb: isWeb),
 
-              const SizedBox(height: 32), // More space at the bottom
-              const Footer(),
-            ],
+                SizedBox(height: 32),
+                Footer(textColorLight: textColorLight),
+              ],
+            ),
           ),
         ),
       ),
@@ -105,7 +152,11 @@ class AboutPage extends StatelessWidget {
 // ---  Widgets ---
 
 class AnimatedAppTitle extends StatefulWidget {
-  const AnimatedAppTitle({super.key});
+  final Color primaryColor;
+  final bool isWeb; // Add isWeb property
+
+  const AnimatedAppTitle(
+      {super.key, required this.primaryColor, required this.isWeb});
 
   @override
   State<AnimatedAppTitle> createState() => _AnimatedAppTitleState();
@@ -141,9 +192,9 @@ class _AnimatedAppTitleState extends State<AnimatedAppTitle>
       child: Text(
         'AI Hotspot Prediction',
         style: TextStyle(
-          fontSize: 28,
+          fontSize: widget.isWeb ? 32 : 28, // Larger font size on web
           fontWeight: FontWeight.w900,
-          color: Colors.redAccent, // Modern Color
+          color: widget.primaryColor,
           shadows: [
             Shadow(
               blurRadius: 5,
@@ -159,8 +210,9 @@ class _AnimatedAppTitleState extends State<AnimatedAppTitle>
 
 class SectionTitle extends StatelessWidget {
   final String title;
+  final Color color;
 
-  const SectionTitle({Key? key, required this.title}) : super(key: key);
+  const SectionTitle({super.key, required this.title, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -169,70 +221,69 @@ class SectionTitle extends StatelessWidget {
       style: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
-        color: Colors.indigo.shade700,
+        color: color,
       ),
-    );
-  }
-}
-
-class NeumorphicContainer extends StatelessWidget {
-  final Widget child;
-
-  const NeumorphicContainer({Key? key, required this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            offset: const Offset(4, 4),
-            blurRadius: 10,
-            spreadRadius: 1,
-          ),
-          const BoxShadow(
-            color: Colors.white,
-            offset: Offset(-4, -4),
-            blurRadius: 10,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }
 
 class DataSourcesList extends StatelessWidget {
-  const DataSourcesList({super.key});
+  final Color primaryColor;
+  final Color textColorLight;
+  final Color surfaceColor; // Add surface color
+  final bool isWeb; // Add isWeb property
+
+  const DataSourcesList(
+      {super.key,
+      required this.primaryColor,
+      required this.textColorLight,
+      required this.surfaceColor,
+      required this.isWeb});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DataSourceItem(
           title: 'Historical Accident Data',
           description:
               'Comprehensive database of past accidents with location, time, severity, and contributing factors.',
+          icon: Icons.history,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         DataSourceItem(
           title: 'Real-time Traffic Data',
           description:
               'Up-to-the-minute information on traffic flow and congestion from sensors and navigation apps.',
+          icon: Icons.traffic,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         DataSourceItem(
           title: 'Weather Conditions',
           description:
               'Real-time and forecasted weather data, including precipitation, visibility, and temperature.',
+          icon: Icons.wb_cloudy,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         DataSourceItem(
           title: 'Road Infrastructure Data',
           description:
               'Information about road geometry, lane configurations, speed limits, and potential hazards.',
+          icon: Icons.map,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
       ],
     );
@@ -242,23 +293,47 @@ class DataSourcesList extends StatelessWidget {
 class DataSourceItem extends StatelessWidget {
   final String title;
   final String description;
+  final IconData icon;
+  final Color color;
+  final Color textColor;
+  final Color surfaceColor; // Add surface color
+  final bool isWeb; // Add isWeb property
 
   const DataSourceItem(
-      {Key? key, required this.title, required this.description})
-      : super(key: key);
+      {super.key,
+      required this.title,
+      required this.description,
+      required this.icon,
+      required this.color,
+      required this.textColor,
+      required this.surfaceColor,
+      required this.isWeb});
 
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+    return Container(
+      // Wrap content
+      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0), // Add margin
+      decoration: BoxDecoration(
+        color: surfaceColor, // Use surface color
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300.withOpacity(0.3), // Subtle shadow
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.data_usage,
-              color: Colors.indigo.shade400, size: isSmallScreen ? 20 : 24),
-          const SizedBox(width: 8),
+          Icon(icon, color: color, size: isSmallScreen ? 20 : 24),
+          const SizedBox(width: 16), //Increased spacing
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,13 +341,18 @@ class DataSourceItem extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen ? 15 : 16),
+                    fontWeight: FontWeight.bold,
+                    fontSize: isSmallScreen ? 15 : 16,
+                    color: textColor, // Apply text color
+                  ),
                 ),
+                SizedBox(height: 4),
                 Text(
                   description,
                   style: TextStyle(
-                      color: Colors.black54, fontSize: isSmallScreen ? 13 : 14),
+                    color: textColor,
+                    fontSize: isSmallScreen ? 13 : 14,
+                  ),
                 ),
               ],
             ),
@@ -284,11 +364,21 @@ class DataSourceItem extends StatelessWidget {
 }
 
 class KeyFeaturesList extends StatelessWidget {
-  const KeyFeaturesList({super.key});
+  final Color primaryColor;
+  final Color textColorLight;
+  final Color surfaceColor; // Add surface color
+  final bool isWeb; // Add isWeb property
+
+  const KeyFeaturesList(
+      {super.key,
+      required this.primaryColor,
+      required this.textColorLight,
+      required this.surfaceColor,
+      required this.isWeb});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FeatureItem(
@@ -296,30 +386,50 @@ class KeyFeaturesList extends StatelessWidget {
           description:
               'Continuously monitors data streams and updates hotspot predictions in real-time for proactive safety measures.',
           icon: Icons.location_on,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         FeatureItem(
           title: 'Historical Data Visualization',
           description:
               'Provides interactive charts and graphs for analyzing accident trends and patterns over time.',
           icon: Icons.trending_up,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         FeatureItem(
           title: 'Risk Factor Analysis',
           description:
               'Identifies the key factors contributing to accident risk in specific areas, enabling targeted interventions.',
           icon: Icons.warning,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         FeatureItem(
           title: 'Customizable Alerts',
           description:
               'Allows users to set up alerts for areas of interest and receive timely notifications about potential hazards.',
           icon: Icons.notifications_active,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
         FeatureItem(
           title: 'Integration with Navigation Apps',
           description:
               'Integrates with popular navigation apps to provide drivers with warnings about potential hazards along their route.',
           icon: Icons.navigation,
+          color: primaryColor,
+          textColor: textColorLight,
+          surfaceColor: surfaceColor, // Pass surface color
+          isWeb: isWeb,
         ),
       ],
     );
@@ -330,26 +440,46 @@ class FeatureItem extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
+  final Color color;
+  final Color textColor;
+  final Color surfaceColor; // Add surface color
+  final bool isWeb; // Add isWeb property
 
   const FeatureItem(
-      {Key? key,
+      {super.key,
       required this.title,
       required this.description,
-      required this.icon})
-      : super(key: key);
+      required this.icon,
+      required this.color,
+      required this.textColor,
+      required this.surfaceColor,
+      required this.isWeb});
 
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      // Wrap content
+      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0), // Add margin
+      decoration: BoxDecoration(
+        color: surfaceColor, // Use surface color
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300.withOpacity(0.3), // Subtle shadow
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon,
-              color: Colors.indigo.shade400, size: isSmallScreen ? 20 : 24),
-          const SizedBox(width: 8),
+          Icon(icon, color: color, size: isSmallScreen ? 20 : 24),
+          const SizedBox(width: 16), //Increased spacing
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,13 +487,18 @@ class FeatureItem extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen ? 15 : 16),
+                    fontWeight: FontWeight.bold,
+                    fontSize: isSmallScreen ? 15 : 16,
+                    color: color, // Apply text color
+                  ),
                 ),
+                SizedBox(height: 4),
                 Text(
                   description,
                   style: TextStyle(
-                      color: Colors.black54, fontSize: isSmallScreen ? 13 : 14),
+                    color: textColor,
+                    fontSize: isSmallScreen ? 13 : 14,
+                  ),
                 ),
               ],
             ),
@@ -375,7 +510,11 @@ class FeatureItem extends StatelessWidget {
 }
 
 class InnovationDescription extends StatelessWidget {
-  const InnovationDescription({super.key});
+  final Color textColorLight;
+  final bool isWeb; // Add isWeb property
+
+  const InnovationDescription(
+      {super.key, required this.textColorLight, required this.isWeb});
 
   @override
   Widget build(BuildContext context) {
@@ -387,7 +526,7 @@ class InnovationDescription extends StatelessWidget {
         Text(
           'Our AI models are trained on vast datasets and constantly refined. We use:',
           style: TextStyle(
-              fontSize: isSmallScreen ? 15 : 16, color: Colors.black54),
+              fontSize: isSmallScreen ? 15 : 16, color: textColorLight),
         ),
         const SizedBox(height: 8),
         Text(
@@ -409,7 +548,7 @@ class InnovationDescription extends StatelessWidget {
         Text(
           'We are committed to pushing the boundaries of AI to create safer roads for everyone.',
           style: TextStyle(
-              fontSize: isSmallScreen ? 15 : 16, color: Colors.black54),
+              fontSize: isSmallScreen ? 15 : 16, color: textColorLight),
         ),
       ],
     );
@@ -417,7 +556,11 @@ class InnovationDescription extends StatelessWidget {
 }
 
 class ContactUsSection extends StatelessWidget {
-  const ContactUsSection({super.key});
+  final Color primaryColor;
+  final bool isWeb; // Add isWeb property
+
+  const ContactUsSection(
+      {super.key, required this.primaryColor, required this.isWeb});
 
   @override
   Widget build(BuildContext context) {
@@ -434,13 +577,13 @@ class ContactUsSection extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Icon(Icons.email, color: Colors.indigo.shade400),
+            Icon(Icons.email, color: primaryColor),
             const SizedBox(width: 8),
             InkWell(
               child: Text(
                 'support@example.com',
                 style: TextStyle(
-                    color: Colors.blue,
+                    color: primaryColor, // Match primary color
                     decoration: TextDecoration.underline,
                     fontSize: isSmallScreen ? 14 : 15),
               ),
@@ -451,13 +594,13 @@ class ContactUsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(Icons.phone, color: Colors.indigo.shade400),
+            Icon(Icons.phone, color: primaryColor),
             const SizedBox(width: 8),
             InkWell(
               child: Text(
                 '+1-555-123-4567',
                 style: TextStyle(
-                    color: Colors.blue,
+                    color: primaryColor, // Match primary color
                     decoration: TextDecoration.underline,
                     fontSize: isSmallScreen ? 14 : 15),
               ),
@@ -471,14 +614,16 @@ class ContactUsSection extends StatelessWidget {
 }
 
 class Footer extends StatelessWidget {
-  const Footer({super.key});
+  final Color textColorLight;
+
+  const Footer({super.key, required this.textColorLight});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Text(
         '© 2024 AI Hotspot Prediction. All rights reserved.',
-        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+        style: TextStyle(fontSize: 12, color: textColorLight),
       ),
     );
   }

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class HelpSupportPage extends StatelessWidget {
   final Color themeColor;
 
-  HelpSupportPage({required this.themeColor});
+  const HelpSupportPage({super.key, required this.themeColor});
 
   @override
   Widget build(BuildContext context) {

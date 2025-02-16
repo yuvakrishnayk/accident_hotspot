@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // For animations (install: `flutter pub add flutter_animate`)
-import 'package:flutter_markdown/flutter_markdown.dart'; // For Markdown formatting (install: `flutter pub add flutter_markdown`)
-import 'package:url_launcher/url_launcher.dart'; // For links in Markdown
-// For Markdown formatting
-import 'package:shared_preferences/shared_preferences.dart'; //For Persisting Open/Closed State (install: `flutter pub add shared_preferences`)
-import 'package:shimmer/shimmer.dart'; // For Loading animation (install: `flutter pub add shimmer`)
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: FAQPage(),
+  ));
+}
 
 class FAQPage extends StatefulWidget {
+  const FAQPage({super.key});
+
   @override
   _FAQPageState createState() => _FAQPageState();
 }
@@ -14,61 +21,72 @@ class FAQPage extends StatefulWidget {
 class _FAQPageState extends State<FAQPage> {
   List<FAQItem> faqItems = [
     FAQItem(
-      question: 'How does the app predict accident hotspots?',
+      question: 'What is an accident hotspot, and how does your app define it?',
       answer: '''
-The app leverages **advanced AI algorithms** to analyze historical accident data, traffic patterns, weather conditions, and road infrastructure. By combining these factors, the app identifies areas with a high likelihood of accidents.
-
-- The AI model is trained on vast datasets and is **continuously updated** to improve accuracy.
-- We use a combination of time-series analysis and machine learning techniques.
-
-Learn more about our methodology [here](https://www.example.com/methodology).
+An accident hotspot is a location with a statistically higher-than-average number of accidents compared to other areas. Our app identifies these hotspots by analyzing historical accident data, traffic volume, road geometry, and other relevant factors.  We then use predictive modeling to forecast future hotspots based on these trends.
 ''',
     ),
     FAQItem(
-      question: 'Is the app available worldwide?',
+      question:
+          'What data sources does your app use to predict accident hotspots?',
       answer:
-          'Currently, the app is available in select regions where we have sufficient data to provide accurate predictions. We are actively working on expanding our coverage to more countries and regions. Stay tuned for updates!',
+          'We utilize various data sources, including historical accident records from government agencies, real-time traffic data, weather data, road network information (e.g., speed limits, number of lanes, road curvature), and user-reported incidents.  Combining these sources allows for a comprehensive and accurate prediction model.',
     ),
     FAQItem(
-      question: 'How accurate are the predictions?',
+      question:
+          'How frequently is the data updated, and how does this affect prediction accuracy?',
       answer:
-          'The accuracy of the predictions depends on the quality and quantity of data available for a specific region. In areas with comprehensive data, the predictions are highly accurate. However, in regions with limited data, the accuracy may vary. We are constantly refining our algorithms and expanding our datasets to improve accuracy across all regions.',
+          'Our data is updated at different intervals depending on the source.  Real-time traffic and weather data are updated continuously. Accident records are typically updated monthly or quarterly, depending on the reporting agency.  Frequent updates ensure that our predictions are based on the most current information, improving accuracy and reliability.',
     ),
     FAQItem(
-      question: 'Can I contribute data to improve the app?',
+      question: 'Does the app provide real-time alerts for accident hotspots?',
       answer:
-          'Yes! User contributions are invaluable to us. You can report accidents, traffic conditions, or road hazards through the app. This data helps us improve the accuracy of our predictions and make the roads safer for everyone.',
+          'Yes, the app provides real-time alerts for accident hotspots along your planned route.  These alerts give you advanced warning, allowing you to adjust your driving behavior and potentially avoid dangerous situations. Alert frequency and sensitivity can be customized in the app settings.',
     ),
     FAQItem(
-      question: 'What measures are taken to ensure user privacy?',
+      question:
+          'How can I report an accident or hazard to improve the app\'s accuracy?',
       answer:
-          'We take user privacy very seriously. All data collected is anonymized and securely stored. We comply with global data protection regulations, such as GDPR, and do not share personal information with third parties without consent.',
+          'You can easily report accidents or hazards directly through the app.  Simply tap the "Report Incident" button and provide details about the location, type of incident, and any relevant observations.  This user-generated data helps us validate our models and improve the overall accuracy of our hotspot predictions. Photos can also be uploaded if safe to do so.',
     ),
     FAQItem(
-      question: 'How often is the data updated?',
+      question:
+          'What safety tips does the app offer in high-risk accident zones?',
       answer:
-          'The data is updated in real-time for traffic conditions and weather. Historical accident data is updated monthly, and the AI model is retrained periodically to incorporate new data and improve predictions.',
+          'In high-risk accident zones, the app provides contextually relevant safety tips, such as reducing speed, increasing following distance, being aware of pedestrians and cyclists, and paying extra attention to road signs. These tips are tailored to the specific characteristics of the hotspot and aim to promote safer driving practices.',
     ),
     FAQItem(
-      question: 'What should I do if I encounter an error in the app?',
+      question:
+          'How does your app protect user privacy when collecting and using location data?',
       answer:
-          'If you encounter any issues or errors, please report them through the "Help & Support" section in the app. Our support team will investigate and resolve the issue as quickly as possible.',
+          'We are committed to protecting user privacy.  All location data is anonymized and aggregated before being used in our prediction models.  We do not track individual user movements or share personally identifiable information with any third parties.  Our privacy policy outlines our data handling practices in detail, and we comply with all applicable data protection regulations.',
     ),
     FAQItem(
-      question: 'Are there any subscription fees?',
+      question:
+          'What is the accuracy rate of the accident hotspot predictions?',
       answer:
-          'The basic version of the app is free to use. However, we offer a premium subscription that provides additional features such as detailed route analysis, personalized safety tips, and ad-free experience. You can upgrade to premium within the app.',
+          'Our accident hotspot predictions are continuously evaluated for accuracy.  While accuracy can vary depending on data availability and region, we typically achieve a precision rate of over 80% in identifying areas with a high risk of accidents. We actively monitor performance and refine our models to further improve accuracy.',
+    ),
+    FAQItem(
+      question:
+          'Can I customize the alert settings to receive notifications only for specific types of hotspots?',
+      answer:
+          'Yes, the app allows you to customize alert settings. You can choose to receive notifications for all hotspots or filter alerts based on specific risk factors, such as weather conditions, time of day, or accident severity. Customization provides a more tailored and relevant alerting experience.',
+    ),
+    FAQItem(
+      question: 'Is the app free to use, or does it require a subscription?',
+      answer:
+          'The app offers both a free and a premium subscription. The free version provides basic accident hotspot prediction and real-time alerts. The premium subscription unlocks advanced features, such as detailed route analysis, personalized safety recommendations, historical accident data visualizations, and an ad-free experience.',
     ),
   ];
 
-  List<bool> _expandedStates = []; //To Manage the open/close state of each FAQ
-  bool _isLoading = true; // Simulate loading data
+  List<bool> _expandedStates = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadExpandedStates();
-    // Simulate data loading
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
         _isLoading = false;
@@ -76,71 +94,83 @@ Learn more about our methodology [here](https://www.example.com/methodology).
     });
   }
 
-  // Load the open/closed state of FAQ from local storage
   _loadExpandedStates() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _expandedStates = List.generate(faqItems.length, (index) {
-        return prefs.getBool('faq_$index') ?? false; // Default to closed
+        return prefs.getBool('faq$index') ?? false;
       });
     });
   }
 
-  //Save the open/close state of the FAQ to local storage
-  _saveExpandedState(int index, bool isExpanded) async {
+  saveExpandedState(int index, bool isExpanded) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('faq_$index', isExpanded);
+    await prefs.setBool('faq$index', isExpanded);
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900; // Adjust breakpoint as needed
+    final contentWidth =
+        isDesktop ? screenWidth * 0.7 : screenWidth; // Responsive width
+    final fontSizeTitle = isDesktop ? 32.0 : 28.0;
+    final fontSizeNormal = isDesktop ? 18.0 : 16.0;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Frequently Asked Questions',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back, color: Colors.white)),
+        backgroundColor: Colors.teal,
         centerTitle: true,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              //Implement search functionality here
-              //This will be a search through the FAQ Items
-              _showSearchDialog(context);
-            },
+            icon: Icon(Icons.search, color: Colors.white),
+            onPressed: () => _showSearchDialog(context),
           )
         ],
       ),
+      backgroundColor: Color(0xFFD3F0EE),
       body: _isLoading
           ? _buildLoadingShimmer()
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
+          : Center(
+              child: Container(
+                width: contentWidth,
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Frequently Asked Questions',
                       style: TextStyle(
-                          fontSize: 28,
+                          fontSize: fontSizeTitle,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor),
+                          color: Colors.teal),
                     ).animate().fadeIn(duration: Duration(milliseconds: 500)),
                     SizedBox(height: 16),
-                    ...List.generate(faqItems.length, (index) {
-                      return _buildFAQItem(
-                          faqItem: faqItems[index],
-                          index: index,
-                          isExpanded: _expandedStates[index]);
-                    }),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: faqItems.length,
+                        itemBuilder: (context, index) {
+                          return _buildFAQItem(
+                              faqItem: faqItems[index],
+                              index: index,
+                              isExpanded: _expandedStates[index],
+                              isDesktop: isDesktop,
+                              fontSizeNormal: fontSizeNormal);
+                        },
+                      ),
+                    ),
                     SizedBox(height: 24),
                     Center(
                       child: Text(
                         'Still have questions? Contact our support team!',
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        style: TextStyle(
+                            fontSize: fontSizeNormal, color: Colors.grey[600]),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -156,7 +186,7 @@ Learn more about our methodology [here](https://www.example.com/methodology).
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: ListView.builder(
-        itemCount: 5, // Simulate 5 FAQ items loading
+        itemCount: 5,
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, index) {
           return Card(
@@ -190,7 +220,9 @@ Learn more about our methodology [here](https://www.example.com/methodology).
   Widget _buildFAQItem(
       {required FAQItem faqItem,
       required int index,
-      required bool isExpanded}) {
+      required bool isExpanded,
+      required bool isDesktop,
+      required double fontSizeNormal}) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
@@ -201,12 +233,13 @@ Learn more about our methodology [here](https://www.example.com/methodology).
         initiallyExpanded: isExpanded,
         title: Text(
           faqItem.question,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              fontSize: fontSizeNormal + 2, fontWeight: FontWeight.w600),
         ),
         onExpansionChanged: (bool expanded) {
           setState(() {
             _expandedStates[index] = expanded;
-            _saveExpandedState(index, expanded); // Save the state
+            saveExpandedState(index, expanded);
           });
         },
         children: [
@@ -222,7 +255,7 @@ Learn more about our methodology [here](https://www.example.com/methodology).
               },
               styleSheet:
                   MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                p: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                p: TextStyle(fontSize: fontSizeNormal, color: Colors.grey[700]),
               ),
             ),
           ),
@@ -299,52 +332,65 @@ class SearchResultsPage extends StatelessWidget {
   final String searchTerm;
 
   const SearchResultsPage(
-      {Key? key, required this.results, required this.searchTerm})
-      : super(key: key);
+      {super.key, required this.results, required this.searchTerm});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+    final contentWidth = isDesktop ? screenWidth * 0.7 : screenWidth;
+    final fontSizeTitle = isDesktop ? 24.0 : 20.0;
+    final fontSizeNormal = isDesktop ? 17.0 : 15.0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Search Results for "$searchTerm"'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: results.isEmpty
-            ? Center(
-                child: Text('No results found for "$searchTerm".'),
-              )
-            : ListView.builder(
-                itemCount: results.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            results[index].question,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            results[index].answer,
-                            style: TextStyle(
-                                fontSize: 16, color: Colors.grey[700]),
-                          ),
-                        ],
+      body: Center(
+        child: Container(
+          width: contentWidth,
+          padding: const EdgeInsets.all(16.0),
+          child: results.isEmpty
+              ? Center(
+                  child: Text(
+                    'No results found for "$searchTerm".',
+                    style: TextStyle(fontSize: fontSizeNormal),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: results.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  );
-                },
-              ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              results[index].question,
+                              style: TextStyle(
+                                  fontSize: fontSizeTitle,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              results[index].answer,
+                              style: TextStyle(
+                                  fontSize: fontSizeNormal,
+                                  color: Colors.grey[700]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

@@ -5,10 +5,10 @@ class NotificationSettingsPage extends StatefulWidget {
   final Color accentColor;
 
   const NotificationSettingsPage({
-    Key? key,
+    super.key,
     required this.themeColor,
     required this.accentColor,
-  }) : super(key: key);
+  });
 
   @override
   _NotificationSettingsPageState createState() =>

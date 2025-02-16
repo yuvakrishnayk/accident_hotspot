@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dio/dio.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AccidentPrediction {
   final double latitude;
@@ -191,23 +192,40 @@ class _MapScreenWebState extends State<MapScreenWeb> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 1200;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Accident Hotspots',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF007B83),
-        elevation: 4,
+        title: Row(
+          children: [
+            Image.network(
+              'https://i.ibb.co/dwBJ16GL/iconn-removebg-preview.png',
+              height: 40,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'SAFORA',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Colors.white,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF005662),
+        elevation: 0,
         actions: [
+          if (isLargeScreen) ...[],
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsPageWeb(),
-                  ));
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPageWeb()),
+            ),
           ),
         ],
       ),
@@ -236,97 +254,142 @@ class _MapScreenWebState extends State<MapScreenWeb> {
                       point: myLocation!,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.location_pin,
-                          color: Colors.blue, size: 40),
+                      child:
+                          _buildCustomMarker(Icons.location_pin, Colors.blue),
                     ),
                   ...predictions.map(
                     (prediction) => Marker(
                       point: LatLng(prediction.latitude, prediction.longitude),
                       width: 40,
                       height: 40,
-                      child: Icon(
+                      child: _buildCustomMarker(
                         Icons.warning_amber_rounded,
-                        color: _getPredictionColor(prediction.prediction),
-                        size: 32,
+                        _getPredictionColor(prediction.prediction),
                       ),
                     ),
                   ),
                 ],
               ),
-              Positioned(
-                top: 20,
-                right: 20,
-                child: Column(
-                  children: [
-                    FloatingActionButton.small(
-                      child: const Icon(Icons.add),
-                      onPressed: () {
-                        mapController.move(
-                          mapController.camera.center,
-                          mapController.camera.zoom + 1,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    FloatingActionButton.small(
-                      child: const Icon(Icons.remove),
-                      onPressed: () {
-                        mapController.move(
-                          mapController.camera.center,
-                          mapController.camera.zoom - 1,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
-          if (isLoading)
-            const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
-              ),
-            ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: Column(
-              children: [
-                _buildActionButton(
-                  icon: Icons.location_searching,
-                  color: Colors.blueGrey[900]!,
-                  onPressed: showCurrentLocation,
-                ),
-                const SizedBox(height: 12),
-                _buildActionButton(
-                  icon: Icons.headphones,
-                  color: Colors.blueGrey[800]!,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ChatBotScreenWeb()),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildActionButton(
-                  icon: _isSatelliteView ? Icons.map : Icons.satellite,
-                  color: Colors.blueGrey[700]!,
-                  onPressed: _toggleMapView,
-                ),
-                const SizedBox(height: 12),
-                _buildActionButton(
-                  icon: Icons.list,
-                  color: Colors.blueGrey[600]!,
-                  onPressed: _showPredictionsBottomSheet,
-                ),
-              ],
-            ),
+          if (isLoading) _buildLoadingIndicator(),
+          _buildControlPanel(isLargeScreen),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomMarker(IconData icon, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
+      child: Icon(icon, color: Colors.white, size: 24),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      color: Colors.black.withOpacity(0.5),
+      child: const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlPanel(bool isLargeScreen) {
+    return Positioned(
+      top: 20,
+      right: 20,
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          width: isLargeScreen ? 300 : 60,
+          child: Column(
+            crossAxisAlignment: isLargeScreen
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isLargeScreen)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'Map Controls',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              _buildControlButton(
+                icon: Icons.location_searching,
+                label: 'Current Location',
+                onPressed: showCurrentLocation,
+                isLargeScreen: isLargeScreen,
+              ),
+              _buildControlButton(
+                icon: Icons.headphones,
+                label: 'Voice Assistant',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ChatBotScreenWeb()),
+                ),
+                isLargeScreen: isLargeScreen,
+              ),
+              _buildControlButton(
+                icon: _isSatelliteView ? Icons.map : Icons.satellite,
+                label: _isSatelliteView ? 'Map View' : 'Satellite View',
+                onPressed: _toggleMapView,
+                isLargeScreen: isLargeScreen,
+              ),
+              _buildControlButton(
+                icon: Icons.list,
+                label: 'Predictions',
+                onPressed: _showPredictionsBottomSheet,
+                isLargeScreen: isLargeScreen,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required bool isLargeScreen,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: isLargeScreen
+          ? ListTile(
+              leading: Icon(icon, color: const Color(0xFF005662)),
+              title: Text(label, style: GoogleFonts.inter()),
+              onTap: onPressed,
+              contentPadding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+            )
+          : IconButton(
+              icon: Icon(icon),
+              onPressed: onPressed,
+              color: const Color(0xFF005662),
+            ),
     );
   }
 
@@ -337,24 +400,5 @@ class _MapScreenWebState extends State<MapScreenWeb> {
       return Colors.red[800]!;
     }
     return Colors.red[800]!;
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Material(
-      shape: const CircleBorder(),
-      elevation: 4,
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white),
-        style: IconButton.styleFrom(
-          backgroundColor: color,
-          padding: const EdgeInsets.all(16),
-        ),
-        onPressed: onPressed,
-      ),
-    );
   }
 }

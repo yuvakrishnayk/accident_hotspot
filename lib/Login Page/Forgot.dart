@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ForgottenPasswordPage extends StatefulWidget {
+  const ForgottenPasswordPage({super.key});
+
   @override
   _ForgottenPasswordPageState createState() => _ForgottenPasswordPageState();
 }
@@ -165,11 +167,6 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                         // Reset Password Button
                         ElevatedButton(
                           onPressed: _resetPassword,
-                          child: Text(
-                            'Reset Password',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500),
-                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor,
                             foregroundColor: Colors.white,
@@ -179,6 +176,11 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 5,
+                          ),
+                          child: Text(
+                            'Reset Password',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],

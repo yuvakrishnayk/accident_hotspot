@@ -5,10 +5,10 @@ class ProfileSettingsPage extends StatefulWidget {
   final Color accentColor;
 
   const ProfileSettingsPage({
-    Key? key,
+    super.key,
     required this.themeColor,
     required this.accentColor,
-  }) : super(key: key);
+  });
 
   @override
   _ProfileSettingsPageState createState() => _ProfileSettingsPageState();
