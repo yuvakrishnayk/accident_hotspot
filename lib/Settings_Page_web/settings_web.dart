@@ -2,6 +2,7 @@ import 'package:accident_hotspot/Functions/auth_func.dart';
 import 'package:accident_hotspot/Settings_Page_web/helper_web.dart';
 import 'package:accident_hotspot/Settings_Page_web/notification_web_page.dart';
 import 'package:accident_hotspot/Settings_Page_web/profile_page_web.dart';
+import 'package:accident_hotspot/auth_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart'; // Animation Package (install: `flutter pub add animate_do`)
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -12,17 +13,21 @@ class SettingsPageWeb extends StatefulWidget {
 
   @override
   _SettingsPageWebState createState() => _SettingsPageWebState();
-  void logout() async {
-    AuthFunc auth = AuthFunc();
-    await auth.signOut();
-  }
 }
 
 class _SettingsPageWebState extends State<SettingsPageWeb> {
   final Color themeColor =
       const Color.fromARGB(255, 1, 107, 121); // Darker teal color
-  final Color accentColor =
-      const Color.fromARGB(255, 1, 79, 79); // Darker accent color
+  final Color accentColor = const Color.fromARGB(255, 1, 79, 79);
+
+  void logout() async {
+    AuthFunc auth = AuthFunc();
+    await auth.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const AuthPage()),
+      (route) => false, // This removes all previous routes
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +268,7 @@ class _SettingsPageWebState extends State<SettingsPageWeb> {
       btnOkText: "Logout",
       btnOkColor: Colors.red.shade600,
       btnOkOnPress: () {
-        widget.logout();
+        logout();
       },
     ).show();
   }
