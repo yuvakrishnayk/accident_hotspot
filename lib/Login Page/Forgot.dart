@@ -9,14 +9,8 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController emailcontroller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  bool _isPasswordStrong(String password) {
-    // Strong password criteria: At least 8 characters, includes letters, numbers, and symbols.
-    final strongPasswordPattern =
-        r'^(?=.[A-Za-z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$';
-    return RegExp(strongPasswordPattern).hasMatch(password);
-  }
 
   void _resetPassword() {
     if (_formKey.currentState!.validate()) {
@@ -99,7 +93,7 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                     child: Column(
                       children: [
                         TextFormField(
-                          controller: newPasswordController,
+                          controller: emailcontroller,
                           decoration: InputDecoration(
                             labelText: 'Email',
                             hintText: 'Enter your Email',
@@ -136,9 +130,7 @@ class _ForgottenPasswordPageState extends State<ForgottenPasswordPage> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter a new password';
                             }
-                            if (!_isPasswordStrong(value)) {
-                              return 'Password must be at least 8 characters and include letters, numbers, and symbols';
-                            }
+
                             return null;
                           },
                         ),

@@ -11,6 +11,7 @@ class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
 
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController emailcontroller = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -123,7 +124,7 @@ class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
                             SizedBox(
                               width: inputFieldWidth,
                               child: TextFormField(
-                                controller: newPasswordController,
+                                controller: emailcontroller,
                                 decoration: InputDecoration(
                                   labelText: 'Email',
                                   hintText: 'Enter your Email',
