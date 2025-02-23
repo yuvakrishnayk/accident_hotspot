@@ -26,8 +26,8 @@ class _SignUpPageWebState extends State<SignUpPageWeb> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
   void Signup(String email, password) async {
-    final AuthFunc _auth = AuthFunc();
-    UserCredential? user = await _auth.signup(email, password);
+    final AuthFunc auth = AuthFunc();
+    UserCredential? user = await auth.signup(email, password);
     if (user != null) {
       print('User Register Successfully');
       ScaffoldMessenger.of(context)

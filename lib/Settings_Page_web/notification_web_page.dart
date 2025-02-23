@@ -7,10 +7,10 @@ class NotificationSettingsPageWeb extends StatefulWidget {
   final Color accentColor;
 
   const NotificationSettingsPageWeb({
-    Key? key,
+    super.key,
     this.themeColor = const Color.fromARGB(255, 1, 100, 90), // Default color
     this.accentColor = Colors.teal, // Default accent
-  }) : super(key: key);
+  });
 
   @override
   _NotificationSettingsPageWebState createState() =>

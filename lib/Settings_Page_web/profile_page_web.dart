@@ -1,7 +1,6 @@
 import 'dart:io'; // For File I/O
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart'; // Form Validation (install: `flutter pub add validators`)
-// Animation (install: `flutter pub add animate_do`)
 import 'package:image_picker/image_picker.dart'; // Image Picking (install: `flutter pub add image_picker`)
 import 'package:shared_preferences/shared_preferences.dart'; // Persistent Storage
 import 'package:intl/intl.dart'; // Date Formatting
@@ -118,9 +117,13 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
     TextInputType keyboardType,
     String? Function(String?) validator,
   ) {
+    // Create a temporary controller with current value
+    final TextEditingController tempController =
+        TextEditingController(text: controller.text);
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return Dialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -143,7 +146,7 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
                 Form(
                   key: _formKey,
                   child: TextFormField(
-                    controller: controller,
+                    controller: tempController, // Use temporary controller
                     keyboardType: keyboardType,
                     decoration: InputDecoration(
                       labelText: fieldName,
@@ -180,7 +183,7 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(dialogContext),
                       child: Text(
                         'Cancel',
                         style: GoogleFonts.inter(
@@ -191,10 +194,20 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          _saveProfileData();
-                          Navigator.pop(context);
+                          // Update the main controller
+                          setState(() {
+                            controller.text = tempController.text;
+                          });
+
+                          // Save data
+                          await _saveProfileData();
+
+                          // Close the edit dialog
+                          Navigator.pop(dialogContext);
+
+                          // Show success dialog
                           AwesomeDialog(
                             context: context,
                             dialogType: DialogType.success,
@@ -216,6 +229,7 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
                               fontWeight: FontWeight.w500,
                             ),
                             width: 400,
+                            btnOkOnPress: () {},
                           ).show();
                         }
                       },
@@ -624,8 +638,21 @@ class _ProfileSettingsPageWebState extends State<ProfileSettingsPageWeb> {
         ),
         onTap: onTap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        // ... continue from the previous code ...
+
         hoverColor: widget.accentColor.withOpacity(0.05),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose of the controllers when the widget is disposed
+    nameController.dispose();
+    vehicleTypeController.dispose();
+    dobController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    super.dispose();
   }
 }

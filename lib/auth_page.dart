@@ -8,14 +8,16 @@ class AuthPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return MapScreenWeb();
-          } else {
-            return LayoutBuilderWidget();
-          }
-        });
+    return Scaffold(
+      body: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return MapScreenWeb();
+            } else {
+              return LayoutBuilderWidget();
+            }
+          }),
+    );
   }
 }

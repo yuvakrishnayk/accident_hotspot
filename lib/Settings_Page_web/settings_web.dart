@@ -41,7 +41,13 @@ class _SettingsPageWebState extends State<SettingsPageWeb> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back),
+          color: Colors.black,
+        ),
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
         title: FadeInDown(

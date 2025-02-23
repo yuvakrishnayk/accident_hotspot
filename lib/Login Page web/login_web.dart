@@ -38,8 +38,8 @@ class _LoginPageWebState extends State<LoginPageWeb> {
     });
 
     try {
-      final AuthFunc _auth = AuthFunc();
-      UserCredential? user = await _auth.signin(
+      final AuthFunc auth = AuthFunc();
+      UserCredential? user = await auth.signin(
         email.trim(),
         password,
       );

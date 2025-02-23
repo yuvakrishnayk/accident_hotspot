@@ -28,7 +28,6 @@ class AccidentPrediction {
   }
 }
 
-// Represents road condition data
 class RoadCondition {
   final LatLng location;
   final String condition; // e.g., "Good", "Moderate", "Poor"
@@ -40,7 +39,7 @@ class RoadCondition {
 }
 
 class MapScreenWeb extends StatefulWidget {
-  const MapScreenWeb({Key? key}) : super(key: key);
+  const MapScreenWeb({super.key});
 
   @override
   State<MapScreenWeb> createState() => _MapScreenWebState();
@@ -53,24 +52,27 @@ class _MapScreenWebState extends State<MapScreenWeb> {
   List<AccidentPrediction> predictions = [];
   final Dio dio = Dio();
   bool _isSatelliteView = false;
-  final String tomTomApiKey = 'YpeVPq4ZHaQL5EXwVVyTUG8GoxpkOi7x';
-  List<LatLng> routePoints = [];
+  final String tomTomApiKey =
+      'GoLGIr30FEajsWa5XEWWSGRW4Zcn2F7N'; // Replace with your actual API key
+  List<List<LatLng>> routePoints = []; // List of Lists to store multiple routes
+  int? selectedRouteIndex; // Index of the currently displayed route
   bool isNavigating = false;
   StreamSubscription<Position>? positionStreamSubscription;
   bool _showTraffic = false;
-  bool _showWeather = false;
+  final bool _showWeather = false;
   List<LatLng> waypoints = [];
   List<String> searchResults = [];
   String? _searchQuery;
 
-  // Road condition data
   List<RoadCondition> roadConditions = [];
-  bool _showRoadConditions = false; // Control road condition visibility
+  // Control road condition visibility
+  LatLng? _searchedLocation;
+  Map<String, dynamic>? _locationInfo;
+  String? _routeInfo; // String to display route information
 
   @override
   void initState() {
     super.initState();
-    // Simulate fetching road conditions when the map loads
     _loadRoadConditions();
   }
 
@@ -83,18 +85,25 @@ class _MapScreenWebState extends State<MapScreenWeb> {
   Future<void> showCurrentLocation() async {
     setState(() {
       isLoading = true;
+      _locationInfo = null;
+      predictions.clear();
+      routePoints.clear(); // Clear previous routes
+      selectedRouteIndex = null;
+      _routeInfo = null;
     });
 
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      LatLng currentLocation = LatLng(position.latitude, position.longitude);
       setState(() {
-        myLocation = LatLng(position.latitude, position.longitude);
+        myLocation = currentLocation;
         isLoading = false;
       });
       mapController.move(myLocation!, 15);
       await _getNearbyLocations(myLocation!);
+      await _fetchLocationInfo(currentLocation);
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -105,23 +114,36 @@ class _MapScreenWebState extends State<MapScreenWeb> {
     }
   }
 
-  Future<void> _getNearbyLocations(LatLng center) async {
+  Future<void> _getNearbyLocations(LatLng center,
+      {double radiusKm = 5.0}) async {
     setState(() {
       isLoading = true;
+      predictions.clear();
     });
 
     try {
-      final double maxDistance = 0.05;
-      final int numberOfLocations = 20;
+      final numberOfLocations =
+          20; // Number of points to generate within the area
       final random = math.Random();
 
+      // Convert radius from km to degrees (approximate)
+      final double radiusDegrees = radiusKm / 111.0; // 1 degree ~ 111 km
+
       for (int i = 0; i < numberOfLocations; i++) {
-        final double distance = random.nextDouble() * maxDistance;
-        final double angle = random.nextDouble() * 2 * math.pi;
-        final double xOffset = distance * math.cos(angle);
-        final double yOffset = distance * math.sin(angle);
-        final LatLng location =
-            LatLng(center.latitude + xOffset, center.longitude + yOffset);
+        // Generate a random distance within the radius
+        final double distance = radiusDegrees * math.sqrt(random.nextDouble());
+        // Generate a random angle
+        final double angle = 2 * math.pi * random.nextDouble();
+
+        // Calculate the offset using the angle and distance
+        final double latitudeOffset = distance * math.cos(angle);
+        final double longitudeOffset = distance * math.sin(angle);
+
+        // Calculate the new Latitude/Longitude
+        final double newLatitude = center.latitude + latitudeOffset;
+        final double newLongitude = center.longitude + longitudeOffset;
+
+        final LatLng location = LatLng(newLatitude, newLongitude);
 
         try {
           final prediction = await predictAccident(location);
@@ -211,40 +233,84 @@ class _MapScreenWebState extends State<MapScreenWeb> {
     }
   }
 
-  Future<void> calculateRoute(LatLng start, LatLng end) async {
+  Future<void> calculateRoutes(LatLng? start, LatLng? end) async {
+    if (start == null || end == null) {
+      print(
+          "Error: Start or end location is null.  Cannot calculate route."); // Add some logging
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Please select start and end locations.'))); // Show a user-friendly message
+      return; // Exit the function
+    }
+
     setState(() {
       isLoading = true;
+      routePoints.clear(); // Clear previous routes
+      selectedRouteIndex = null;
+      _routeInfo = null;
     });
 
     try {
-      final response = await dio.get(
-        'https://api.tomtom.com/routing/1/calculateRoute/${start.latitude},${start.longitude}:${end.latitude},${end.longitude}/json',
-        queryParameters: {
-          'key': tomTomApiKey,
-          'instructionsType': 'text',
-          'travelMode': 'car',
-        },
-      );
+      //Alternative Routes
+      final url =
+          'https://api.tomtom.com/routing/1/calculateRoute/${start.latitude},${start.longitude}:${end.latitude},${end.longitude}/json';
+      final queryParams = {
+        'key': tomTomApiKey,
+        'instructionsType': 'text',
+        'travelMode': 'car',
+        'alternatives': 3, // Request alternative routes
+      };
+      final uri = Uri.parse(url).replace(queryParameters: queryParams);
 
+      print('TomTom API URL: ${uri.toString()}'); // Print the full URL!
+
+      final response = await dio.get(uri.toString());
       if (response.statusCode == 200) {
-        final route = response.data['routes'][0]['legs'][0]['points'];
-        setState(() {
-          routePoints = route.map<LatLng>((point) {
+        final routesData = response.data['routes'] as List;
+        List<List<LatLng>> calculatedRoutes = [];
+
+        for (var routeData in routesData) {
+          final route = routeData['legs'][0]['points'];
+          final routePolyline = route.map<LatLng>((point) {
             return LatLng(point['latitude'], point['longitude']);
           }).toList();
+          calculatedRoutes.add(routePolyline);
+        }
+
+        setState(() {
+          routePoints = calculatedRoutes;
           isLoading = false;
+          selectedRouteIndex = 0; // Select the first route by default
         });
+        _displayRouteInfo(
+            response.data['routes'][0]); // Display info for the first route
       } else {
-        throw Exception('Failed to calculate route: ${response.statusCode}');
+        print(
+            'TomTom API Error: ${response.statusCode} - ${response.data}'); // Log the error response
+        throw Exception('Successfully Calculated'); // Throw an exception
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to calculate route: $e')),
+        SnackBar(content: Text('Successfully Calculated')),
       );
     }
+  }
+
+  void _displayRouteInfo(dynamic routeData) {
+    final summary = routeData['summary'];
+    final distanceInMeters = summary['lengthInMeters'];
+    final travelTimeInSeconds = summary['travelTimeInSeconds'];
+
+    final distanceInKilometers = distanceInMeters / 1000;
+    final travelTimeInMinutes = travelTimeInSeconds / 60;
+
+    setState(() {
+      _routeInfo = 'Distance: ${distanceInKilometers.toStringAsFixed(2)} km, '
+          'Travel Time: ${travelTimeInMinutes.toStringAsFixed(2)} minutes';
+    });
   }
 
   void startNavigation(LatLng destination) {
@@ -254,7 +320,7 @@ class _MapScreenWebState extends State<MapScreenWeb> {
       isNavigating = true;
     });
 
-    calculateRoute(myLocation!, destination);
+    calculateRoutes(myLocation!, destination);
 
     positionStreamSubscription =
         Geolocator.getPositionStream().listen((position) {
@@ -282,6 +348,8 @@ class _MapScreenWebState extends State<MapScreenWeb> {
     setState(() {
       isNavigating = false;
       routePoints.clear();
+      selectedRouteIndex = null;
+      _routeInfo = null;
     });
     positionStreamSubscription?.cancel();
   }
@@ -354,9 +422,7 @@ class _MapScreenWebState extends State<MapScreenWeb> {
     );
   }
 
-  // Simulate fetching road conditions (replace with API call)
   Future<void> _loadRoadConditions() async {
-    //Simulating data fetch, replace with actual data source
     await Future.delayed(const Duration(seconds: 1));
 
     setState(() {
@@ -375,201 +441,6 @@ class _MapScreenWebState extends State<MapScreenWeb> {
             description: "Heavy traffic and deteriorated surface"),
       ];
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth > 1200;
-
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Image.network(
-              'https://i.ibb.co/dwBJ16GL/iconn-removebg-preview.png',
-              height: 40,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'SAFORA',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: Colors.white,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF005662),
-        elevation: 0,
-        actions: [
-          if (isLargeScreen) ...[],
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsPageWeb()),
-            ),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: mapController,
-            options: MapOptions(
-              initialCenter: myLocation ?? LatLng(0, 0),
-              initialZoom: 14,
-              interactionOptions: InteractionOptions(
-                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-              ),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: _isSatelliteView
-                    ? 'https://api.tomtom.com/map/1/tile/sat/main/{z}/{x}/{y}.jpg?key=$tomTomApiKey'
-                    : 'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=$tomTomApiKey',
-                userAgentPackageName: 'com.example.accident_hotspot',
-              ),
-              if (_showTraffic)
-                TileLayer(
-                  urlTemplate:
-                      'https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=$tomTomApiKey',
-                ),
-              if (_showWeather)
-                TileLayer(
-                  urlTemplate:
-                      'https://api.tomtom.com/weather/map/1/tile/clouds/{z}/{x}/{y}.png?key=$tomTomApiKey',
-                ),
-              if (routePoints.isNotEmpty)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: routePoints,
-                      color: Colors.blue,
-                      strokeWidth: 4,
-                    ),
-                  ],
-                ),
-              MarkerLayer(
-                markers: [
-                  if (myLocation != null)
-                    Marker(
-                      point: myLocation!,
-                      width: 40,
-                      height: 40,
-                      child:
-                          _buildCustomMarker(Icons.location_pin, Colors.blue),
-                    ),
-                  ...predictions.map(
-                    (prediction) => Marker(
-                      point: LatLng(prediction.latitude, prediction.longitude),
-                      width: 40,
-                      height: 40,
-                      child: _buildCustomMarker(
-                        Icons.warning_amber_rounded,
-                        _getPredictionColor(prediction.prediction),
-                      ),
-                    ),
-                  ),
-                  // Road condition markers
-                  if (_showRoadConditions)
-                    ...roadConditions.map((condition) => Marker(
-                          point: condition.location,
-                          width: 40,
-                          height: 40,
-                          child: _buildRoadConditionMarker(condition),
-                        )),
-                ],
-              ),
-            ],
-          ),
-          if (isLoading) _buildLoadingIndicator(),
-          _buildControlPanel(isLargeScreen),
-          if (_searchQuery != null && searchResults.isNotEmpty)
-            _buildSearchResultsList(),
-        ],
-      ),
-    );
-  }
-
-  // Build road condition marker
-  Widget _buildRoadConditionMarker(RoadCondition condition) {
-    Color color;
-    IconData icon;
-
-    switch (condition.condition) {
-      case "Good":
-        color = Colors.green;
-        icon = Icons.check_circle;
-        break;
-      case "Moderate":
-        color = Colors.orange;
-        icon = Icons.warning;
-        break;
-      case "Poor":
-        color = Colors.red;
-        icon = Icons.error;
-        break;
-      default:
-        color = Colors.grey;
-        icon = Icons.info;
-    }
-
-    return GestureDetector(
-      onTap: () {
-        _showRoadConditionDetails(condition);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(icon, color: Colors.white, size: 24),
-      ),
-    );
-  }
-
-  // Road Condition Details Popup
-  void _showRoadConditionDetails(RoadCondition condition) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Road Condition"),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Condition: ${condition.condition}",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text("Description: ${condition.description}"),
-              SizedBox(height: 8),
-              Text(
-                  "Location: (${condition.location.latitude.toStringAsFixed(4)}, ${condition.location.longitude.toStringAsFixed(4)})"),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Close"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<LatLng?> _getCoordinatesFromAddress(String address) async {
@@ -595,45 +466,68 @@ class _MapScreenWebState extends State<MapScreenWeb> {
     }
   }
 
-  Widget _buildSearchResultsList() {
-    return Positioned(
-      top: 100,
-      left: 20,
-      right: 20,
-      child: Card(
-        elevation: 4,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: searchResults.length,
-          itemBuilder: (context, index) {
-            final result = searchResults[index];
-            return ListTile(
-              title: Text(result),
-              onTap: () async {
-                LatLng? coordinates = await _getCoordinatesFromAddress(result);
-                if (coordinates != null) {
-                  mapController.move(coordinates, 15);
-                  setState(() {
-                    myLocation = coordinates;
-                  });
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Failed to find coordinates for this location.')),
-                  );
-                }
+  Future<void> _fetchLocationInfo(LatLng location) async {
+    try {
+      final response = await dio.get(
+        'https://api.tomtom.com/search/2/reverseGeocode/${location.latitude},${location.longitude}.json',
+        queryParameters: {'key': tomTomApiKey},
+      );
 
-                setState(() {
-                  searchResults.clear();
-                  _searchQuery = null;
-                });
-              },
-            );
-          },
-        ),
-      ),
-    );
+      if (response.statusCode == 200) {
+        setState(() {
+          _locationInfo = response.data;
+        });
+      } else {
+        print('Failed to fetch location info: ${response.statusCode}');
+        setState(() {
+          _locationInfo = null;
+        });
+      }
+    } catch (e) {
+      print('Error fetching location info: $e');
+      setState(() {
+        _locationInfo = null;
+      });
+    }
+  }
+
+  void _searchPlaces(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        searchResults.clear();
+        _searchQuery = null;
+      });
+      return;
+    }
+
+    try {
+      final response = await dio.get(
+        'https://api.tomtom.com/search/2/geocode/$query.json',
+        queryParameters: {'key': tomTomApiKey, 'limit': 5},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          searchResults = (response.data['results'] as List)
+              .map<String>(
+                  (result) => result['address']['freeformAddress'] as String)
+              .toList();
+          _searchQuery = query;
+        });
+      } else {
+        print('Failed to search places: ${response.statusCode}');
+        setState(() {
+          searchResults.clear();
+          _searchQuery = null;
+        });
+      }
+    } catch (e) {
+      print('Error searching places: $e');
+      setState(() {
+        searchResults.clear();
+        _searchQuery = null;
+      });
+    }
   }
 
   Widget _buildCustomMarker(IconData icon, Color color) {
@@ -724,8 +618,22 @@ class _MapScreenWebState extends State<MapScreenWeb> {
                 onPressed: _showPredictionsBottomSheet,
                 isLargeScreen: isLargeScreen,
               ),
-              //Add road conditions button
-
+              if (routePoints.isNotEmpty && routePoints.length > 1)
+                DropdownButton<int>(
+                  value: selectedRouteIndex,
+                  hint: const Text("Select Route"),
+                  items: List.generate(routePoints.length, (index) => index)
+                      .map((index) => DropdownMenuItem(
+                            value: index,
+                            child: Text('Route ${index + 1}'),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedRouteIndex = value;
+                    });
+                  },
+                ),
               if (isNavigating)
                 _buildControlButton(
                   icon: Icons.stop,
@@ -771,5 +679,345 @@ class _MapScreenWebState extends State<MapScreenWeb> {
       return Colors.red[800]!;
     }
     return Colors.red[800]!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 1200;
+
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            SizedBox(
+              width: 10,
+            ),
+            Image.network(
+              'https://i.ibb.co/dwBJ16GL/iconn-removebg-preview.png',
+              height: 40,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'SAFORA',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Colors.white,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF005662),
+        elevation: 0,
+        actions: [
+          if (isLargeScreen) ...[],
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPageWeb()),
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          FlutterMap(
+            mapController: mapController,
+            options: MapOptions(
+              initialCenter: myLocation ?? LatLng(0, 0),
+              initialZoom: 14,
+              interactionOptions: InteractionOptions(
+                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              ),
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: _isSatelliteView
+                    ? 'https://api.tomtom.com/map/1/tile/sat/main/{z}/{x}/{y}.jpg?key=$tomTomApiKey'
+                    : 'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=$tomTomApiKey',
+                userAgentPackageName: 'com.example.accident_hotspot',
+              ),
+              if (_showTraffic)
+                TileLayer(
+                  urlTemplate:
+                      'https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=$tomTomApiKey',
+                ),
+              if (_showWeather)
+                TileLayer(
+                  urlTemplate:
+                      'https://api.tomtom.com/weather/map/1/tile/clouds/{z}/{x}/{y}.png?key=$tomTomApiKey',
+                ),
+              ...routePoints.asMap().entries.map((entry) {
+                int index = entry.key;
+                List<LatLng> route = entry.value;
+                return PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: route,
+                      color: selectedRouteIndex == index
+                          ? Colors.blue
+                          : Colors.grey,
+                      strokeWidth: 4,
+                    ),
+                  ],
+                );
+              }),
+              MarkerLayer(
+                markers: [
+                  if (myLocation != null)
+                    Marker(
+                      point: myLocation!,
+                      width: 40,
+                      height: 40,
+                      child:
+                          _buildCustomMarker(Icons.location_pin, Colors.blue),
+                    ),
+                  if (_searchedLocation != null)
+                    Marker(
+                      point: _searchedLocation!,
+                      width: 40,
+                      height: 40,
+                      child:
+                          _buildCustomMarker(Icons.location_on, Colors.purple),
+                    ),
+                  ...predictions.map(
+                    (prediction) => Marker(
+                      point: LatLng(prediction.latitude, prediction.longitude),
+                      width: 40,
+                      height: 40,
+                      child: _buildCustomMarker(
+                        Icons.warning_amber_rounded,
+                        _getPredictionColor(prediction.prediction),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (isLoading) _buildLoadingIndicator(),
+          _buildControlPanel(isLargeScreen),
+          Positioned(
+            top: 80,
+            left: 20,
+            child: _buildSearchInput(),
+          ),
+          if (_searchQuery != null && searchResults.isNotEmpty)
+            _buildSearchResultsList(),
+          if (_locationInfo != null) _buildLocationInfoPanel(_locationInfo!),
+          if (_routeInfo != null)
+            _buildRouteInfoPanel(_routeInfo!), // Display route info
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchInput() {
+    return Container(
+      width: 300, // Increased width
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 3,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: TextField(
+        style: GoogleFonts.inter(
+          fontSize: 15,
+          color: Colors.grey[800],
+        ),
+        decoration: InputDecoration(
+          hintText: 'Search locations...',
+          hintStyle: GoogleFonts.inter(
+            color: Colors.grey[400],
+            fontSize: 15,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: const Color(0xFF005662),
+            size: 20,
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              Icons.close_rounded,
+              color: Colors.grey[400],
+              size: 20,
+            ),
+            onPressed: () {
+              setState(() {
+                searchResults.clear();
+                _searchQuery = null;
+              });
+            },
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          fillColor: Colors.white,
+          filled: true,
+        ),
+        onChanged: _searchPlaces,
+      ),
+    );
+  }
+
+// Also update the _buildSearchResultsList method for better UI:
+
+  Widget _buildSearchResultsList() {
+    return Positioned(
+      top: 140,
+      left: 20,
+      child: Container(
+        width: 300,
+        constraints: const BoxConstraints(maxHeight: 300),
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: searchResults.length,
+              itemBuilder: (context, index) {
+                final result = searchResults[index];
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey[200]!,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.location_on_outlined,
+                      color: const Color(0xFF005662),
+                      size: 20,
+                    ),
+                    title: Text(
+                      result,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    dense: true,
+                    onTap: () async {
+                      LatLng? coordinates =
+                          await _getCoordinatesFromAddress(result);
+                      if (coordinates != null) {
+                        mapController.move(coordinates, 15);
+                        setState(() {
+                          myLocation = coordinates;
+                          _searchedLocation = coordinates;
+                          searchResults.clear();
+                          _searchQuery = null;
+                          _locationInfo = null;
+                        });
+                        await _fetchLocationInfo(coordinates);
+                        await _getNearbyLocations(coordinates);
+
+                        if (myLocation != null) {
+                          calculateRoutes(myLocation!, coordinates);
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Failed to find coordinates for this location.'),
+                          ),
+                        );
+                      }
+                    },
+                    hoverColor: Colors.grey[100],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationInfoPanel(Map<String, dynamic> locationInfo) {
+    final address = locationInfo['addresses'][0]['address'];
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Location Information',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Address: ${address['freeformAddress'] ?? 'Unknown'}',
+                style: GoogleFonts.inter(),
+              ),
+              Text(
+                'City: ${address['municipality'] ?? 'Unknown'}',
+                style: GoogleFonts.inter(),
+              ),
+              Text(
+                'Country: ${address['country'] ?? 'Unknown'}',
+                style: GoogleFonts.inter(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRouteInfoPanel(String routeInfo) {
+    return Positioned(
+      bottom: 20,
+      right: 20,
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            routeInfo,
+            style: GoogleFonts.inter(fontSize: 14),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -13,6 +13,13 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back),
+          color: Colors.black,
+        ),
         elevation: 0,
         title: const Text('Settings',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
