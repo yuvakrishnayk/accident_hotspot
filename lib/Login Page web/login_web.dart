@@ -1,6 +1,6 @@
 import 'package:accident_hotspot/Functions/auth_func.dart';
+import 'package:accident_hotspot/Login%20Page%20web/Forgot_web.dart';
 import 'package:accident_hotspot/Login%20Page%20web/Sign_Up_Web.dart';
-import 'package:accident_hotspot/Login%20Page/forgot.dart';
 import 'package:accident_hotspot/Maps/map_screen_web.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -229,7 +229,7 @@ class _LoginPageWebState extends State<LoginPageWeb> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          ForgottenPasswordPage()),
+                                          ForgottenPasswordPageWeb()),
                                 );
                               },
                               child: Text(

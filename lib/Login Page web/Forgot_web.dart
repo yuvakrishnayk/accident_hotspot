@@ -1,7 +1,9 @@
+import 'package:accident_hotspot/Functions/auth_func.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 
 class ForgottenPasswordPageWeb extends StatefulWidget {
-  const ForgottenPasswordPageWeb({super.key});
+  const ForgottenPasswordPageWeb({Key? key}) : super(key: key);
 
   @override
   State<ForgottenPasswordPageWeb> createState() =>
@@ -9,60 +11,37 @@ class ForgottenPasswordPageWeb extends StatefulWidget {
 }
 
 class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
-  final TextEditingController newPasswordController = TextEditingController();
-
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
-  final TextEditingController emailcontroller = TextEditingController();
-
+  final TextEditingController emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  bool _isPasswordStrong(String password) {
-    // Strong password criteria: At least 8 characters, includes letters, numbers, and symbols.
-    final strongPasswordPattern =
-        r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,}$';
-    return RegExp(strongPasswordPattern).hasMatch(password);
+  void resetPassword(String email) async {
+    final AuthFunc _auth = AuthFunc();
+    await _auth.resetPassword(email);
   }
 
   void _resetPassword() {
     if (_formKey.currentState!.validate()) {
-      if (newPasswordController.text == confirmPasswordController.text) {
-        // Password reset logic here
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Success'),
-            content: Text('Your password has been reset successfully.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Error'),
-            content: Text('Passwords do not match!'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
+      // Password reset logic here using emailController.text
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success, // Or any other type you prefer
+        animType: AnimType.rightSlide,
+        title: 'Password Reset Email Sent', // Improved title
+        desc:
+            'A password reset link has been sent to ${emailController.text}. Please check your inbox and follow the instructions to reset your password.',
+        width:
+            MediaQuery.of(context).size.width * 0.4, // More informative message
+        btnOkOnPress: () {
+          // Optional: Navigate to a different screen (e.g., login page)
+          Navigator.of(context).pop(); // Dismiss the dialog
+        },
+      ).show();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color themeColor = Color(0xFFA1E6E7); // Theme color
-    final Color accentColor = Color(0xFF007B83); // Darker accent for text
+    final Color themeColor = const Color(0xFFA1E6E7); // Theme color
+    final Color accentColor = const Color(0xFF007B83); // Darker accent for text
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Responsive variables
@@ -99,7 +78,7 @@ class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 60),
+                      const SizedBox(height: 60),
 
                       // Icon or Title
                       Icon(
@@ -107,18 +86,27 @@ class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
                         size: iconSize,
                         color: accentColor,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Text(
-                        'Reset Your Password',
+                        'Forgot Your Password?',
                         style: TextStyle(
                           fontSize: titleFontSize,
                           fontWeight: FontWeight.w600,
                           color: accentColor,
                         ),
                       ),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Enter your email to reset your password.',
+                        style: TextStyle(
+                          fontSize: titleFontSize - 6,
+                          fontWeight: FontWeight.w500,
+                          color: accentColor,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
 
-                      // Form for password fields
+                      // Form for email field and Reset Password button
                       Form(
                         key: _formKey,
                         child: Column(
@@ -126,91 +114,41 @@ class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
                             SizedBox(
                               width: inputFieldWidth,
                               child: TextFormField(
-                                controller: emailcontroller,
+                                controller: emailController,
                                 decoration: InputDecoration(
                                   labelText: 'Email',
-                                  hintText: 'Enter your Email',
+                                  hintText: 'Enter your email',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   prefixIcon:
-                                      Icon(Icons.lock, color: accentColor),
+                                      Icon(Icons.email, color: accentColor),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                         color: accentColor, width: 2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                              ),
-                            ),
-                            SizedBox(height: 16),
-
-                            // New Password Field
-                            SizedBox(
-                              width: inputFieldWidth,
-                              child: TextFormField(
-                                controller: newPasswordController,
-                                decoration: InputDecoration(
-                                  labelText: 'New Password',
-                                  hintText: 'Enter a strong password',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  prefixIcon:
-                                      Icon(Icons.lock, color: accentColor),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: accentColor, width: 2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                obscureText: true,
+                                keyboardType: TextInputType.emailAddress,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter a new password';
+                                    return 'Please enter your email';
                                   }
-                                  if (!_isPasswordStrong(value)) {
-                                    return 'Password must be at least 8 characters and include letters, numbers, and symbols';
+                                  if (!value.contains('@')) {
+                                    return 'Please enter a valid email address';
                                   }
                                   return null;
                                 },
                               ),
                             ),
-                            SizedBox(height: 16),
-
-                            // Confirm Password Field
-                            SizedBox(
-                              width: inputFieldWidth,
-                              child: TextFormField(
-                                controller: confirmPasswordController,
-                                decoration: InputDecoration(
-                                  labelText: 'Confirm Password',
-                                  hintText: 'Re-enter your password',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  prefixIcon:
-                                      Icon(Icons.lock, color: accentColor),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: accentColor, width: 2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                obscureText: true,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please confirm your password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(height: 30),
+                            const SizedBox(height: 30),
 
                             // Reset Password Button
                             ElevatedButton(
-                              onPressed: _resetPassword,
+                              onPressed: () {
+                                resetPassword(emailController.text);
+                                _resetPassword();
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: accentColor,
                                 foregroundColor: Colors.white,
@@ -231,7 +169,7 @@ class _ForgottenPasswordPageWebState extends State<ForgottenPasswordPageWeb> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

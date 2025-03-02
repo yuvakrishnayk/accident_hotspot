@@ -30,4 +30,11 @@ class AuthFunc {
       print(e.toString());
     }
   }
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 }
