@@ -222,7 +222,7 @@ class _ChatHeader extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Text(
-          'Accident Prediction Assistant',
+          'Accident Assistant',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.primary,
@@ -430,7 +430,8 @@ class _ChatInput extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
