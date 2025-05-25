@@ -18,10 +18,10 @@ SafeRoute is an innovative system that harnesses the power of data analytics and
 ### 🗺️ Interactive Visualization
 
 - Multi-platform application (mobile and web)
-- Intuitive heat map visualization of accident-prone areas
 - Real-time alerts when approaching high-risk zones
 - Customizable risk threshold notifications
 - Alternative route suggestions for safer travel
+
 
 ### 💬 Intelligent Assistant
 
@@ -30,13 +30,16 @@ SafeRoute is an innovative system that harnesses the power of data analytics and
 - Contextual safety recommendations based on location and conditions
 - Incident reporting and community safety contributions
 
+## Live Web Application
+
+Try our live web application: [https://accidentpred-2d2d6.web.app/](https://accidentpred-2d2d6.web.app/)
+
 ## Technologies Used
 
 - **Machine Learning**: TensorFlow, scikit-learn for predictive modeling
 - **Data Processing**: Python, Pandas for data analysis and preparation
-- **Mobile Development**: Flutter for cross-platform mobile application
-- **Web Interface**: React.js with Mapbox/Leaflet for interactive mapping
-- **Backend**: Firebase/Node.js for real-time data management
+- **Mobile Development**: Flutter for cross-platform mobile application and web application
+- **Backend**: Firebase for real-time data management
 - **Natural Language Processing**: BERT/GPT for intelligent chatbot interactions
 
 ## Getting Started
