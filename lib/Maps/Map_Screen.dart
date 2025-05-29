@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:accident_hotspot/Setting_Page/profile_page.dart';
-
 import 'package:accident_hotspot/Maps/Chat.dart';
 import 'package:accident_hotspot/Setting_Page/setting_page.dart';
 import 'package:flutter/material.dart';
@@ -194,36 +193,56 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  // Replace predictAccident with retry logic and default prediction
   Future<Map<String, dynamic>> predictAccident(LatLng location) async {
-    try {
-      final response = await dio.post(
-        'https://prediction-ml-model.onrender.com/predict',
-        data: {
-          'Latitude': location.latitude,
-          'Longitude': location.longitude,
-        },
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
+    int maxRetries = 3;
+    int currentTry = 0;
 
-      if (response.statusCode == 200 && response.data != null) {
-        // Convert the response into a consistent format
-        return {
-          'prediction': response.data['prediction'] ?? 'Unknown',
-          'confidence': response.data['confidence']?.toString() ?? '0',
-        };
-      } else {
-        return {
-          'prediction': 'Unknown',
-          'confidence': '0',
-        };
+    while (currentTry < maxRetries) {
+      try {
+        final response = await dio.post(
+          'https://prediction-ml-model.onrender.com/predict',
+          data: {
+            'Latitude': location.latitude,
+            'Longitude': location.longitude,
+          },
+          options: Options(
+            headers: {'Content-Type': 'application/json'},
+            sendTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data != null) {
+          return {
+            'prediction': response.data['prediction'] ?? 'No Accident',
+            'confidence': response.data['confidence']?.toString() ?? '0',
+          };
+        }
+
+        return _getDefaultPrediction();
+      } catch (e) {
+        currentTry++;
+        print('Attempt $currentTry failed: $e');
+
+        if (currentTry == maxRetries) {
+          print(
+              'All retry attempts failed for location: ${location.latitude}, ${location.longitude}');
+          return _getDefaultPrediction();
+        }
+
+        await Future.delayed(Duration(seconds: 2 * currentTry));
       }
-    } catch (e) {
-      print('Error in predictAccident: $e');
-      return {
-        'prediction': 'Unknown',
-        'confidence': '0',
-      };
     }
+
+    return _getDefaultPrediction();
+  }
+
+  Map<String, dynamic> _getDefaultPrediction() {
+    return {
+      'prediction': 'No Accident',
+      'confidence': '50',
+    };
   }
 
   Future<void> calculateRoutes(LatLng start, LatLng end) async {
@@ -743,15 +762,16 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  // Update _getPredictionColor to match web logic
   Color _getPredictionColor(String prediction) {
-    if (prediction.toLowerCase().contains('high')) {
-      return Colors.red[800]!;
-    } else if (prediction.toLowerCase().contains('medium')) {
-      return Colors.orange[700]!;
-    } else if (prediction.toLowerCase().contains('low')) {
-      return Colors.amber[600]!;
+    switch (prediction.toLowerCase()) {
+      case 'accident':
+        return Colors.red[800]!;
+      case 'no accident':
+        return Colors.green[600]!;
+      default:
+        return Colors.amber[600]!;
     }
-    return Colors.green[600]!; // Default for very low risk or unknown
   }
 
   Future<void> _showNavigationOptions() async {
