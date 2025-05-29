@@ -197,40 +197,32 @@ class _MapScreenState extends State<MapScreen> {
   Future<Map<String, dynamic>> predictAccident(LatLng location) async {
     try {
       final response = await dio.post(
-        'https://jaga001.pythonanywhere.com/predict',
+        'https://prediction-ml-model.onrender.com/predict',
         data: {
           'Latitude': location.latitude,
           'Longitude': location.longitude,
-          'Weather': "Rainy",
-          'Age': 5,
-          'Type_of_Vehicle': "Car",
-          'Road_Type': "City Road",
-          'Time_of_Day': "Night",
-          'Traffic_Density': 1.0,
-          'Speed_Limit': 60,
-          'Number_of_Vehicles': 3,
-          'Driver_Alcohol': 0.0,
-          'Accident_Severity': "High",
-          'Road_Condition': "Wet",
-          'Vehicle_Type': "Car",
-          'Driver_Age': 50,
-          'Driver_Experience': 10,
-          'Road_Light_Condition': "Daylight",
-          'Hour': 22,
-          'Day': 15,
-          'Month': 1,
-          'DayOfWeek': 5,
         },
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
-      if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
+      if (response.statusCode == 200 && response.data != null) {
+        // Convert the response into a consistent format
+        return {
+          'prediction': response.data['prediction'] ?? 'Unknown',
+          'confidence': response.data['confidence']?.toString() ?? '0',
+        };
       } else {
-        throw Exception('Failed to predict accident: ${response.statusCode}');
+        return {
+          'prediction': 'Unknown',
+          'confidence': '0',
+        };
       }
     } catch (e) {
-      throw Exception('Failed to predict accident: $e');
+      print('Error in predictAccident: $e');
+      return {
+        'prediction': 'Unknown',
+        'confidence': '0',
+      };
     }
   }
 

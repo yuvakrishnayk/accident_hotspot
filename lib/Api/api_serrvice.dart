@@ -2,7 +2,7 @@ import 'package:accident_hotspot/Models/model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://jaga001.pythonanywhere.com';
+  static const String baseUrl = 'https://prediction-ml-model.onrender.com';
   final Dio dio = Dio();
 
   Future<Map<String, dynamic>> predictAccident(

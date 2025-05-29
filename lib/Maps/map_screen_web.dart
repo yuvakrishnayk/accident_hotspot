@@ -193,43 +193,54 @@ class _MapScreenWebState extends State<MapScreenWeb> {
   }
 
   Future<Map<String, dynamic>> predictAccident(LatLng location) async {
-    try {
-      final response = await dio.post(
-        'https://jaga001.pythonanywhere.com/predict',
-        data: {
-          'Latitude': location.latitude,
-          'Longitude': location.longitude,
-          'Weather': "Rainy",
-          'Age': 5,
-          'Type_of_Vehicle': "Car",
-          'Road_Type': "City Road",
-          'Time_of_Day': "Night",
-          'Traffic_Density': 1.0,
-          'Speed_Limit': 60,
-          'Number_of_Vehicles': 3,
-          'Driver_Alcohol': 0.0,
-          'Accident_Severity': "High",
-          'Road_Condition': "Wet",
-          'Vehicle_Type': "Car",
-          'Driver_Age': 50,
-          'Driver_Experience': 10,
-          'Road_Light_Condition': "Daylight",
-          'Hour': 22,
-          'Day': 15,
-          'Month': 1,
-          'DayOfWeek': 5,
-        },
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
+    int maxRetries = 3;
+    int currentTry = 0;
 
-      if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
-      } else {
-        throw Exception('Failed to predict accident: ${response.statusCode}');
+    while (currentTry < maxRetries) {
+      try {
+        final response = await dio.post(
+          'https://prediction-ml-model.onrender.com/predict',
+          data: {
+            'Latitude': location.latitude,
+            'Longitude': location.longitude,
+          },
+          options: Options(
+            headers: {'Content-Type': 'application/json'},
+            sendTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data != null) {
+          return {
+            'prediction': response.data['prediction'] ?? 'No Accident',
+            'confidence': response.data['confidence']?.toString() ?? '0',
+          };
+        }
+
+        return _getDefaultPrediction();
+      } catch (e) {
+        currentTry++;
+        print('Attempt $currentTry failed: $e');
+
+        if (currentTry == maxRetries) {
+          print(
+              'All retry attempts failed for location: ${location.latitude}, ${location.longitude}');
+          return _getDefaultPrediction();
+        }
+
+        await Future.delayed(Duration(seconds: 2 * currentTry));
       }
-    } catch (e) {
-      throw Exception('Failed to predict accident: $e');
     }
+
+    return _getDefaultPrediction();
+  }
+
+  Map<String, dynamic> _getDefaultPrediction() {
+    return {
+      'prediction': 'No Accident',
+      'confidence': '50',
+    };
   }
 
   Future<void> calculateRoutes(LatLng start, LatLng end) async {
@@ -752,12 +763,14 @@ class _MapScreenWebState extends State<MapScreenWeb> {
   }
 
   Color _getPredictionColor(String prediction) {
-    if (prediction.toLowerCase().contains('high')) {
-      return Colors.red[800]!;
-    } else if (prediction.toLowerCase().contains('medium')) {
-      return Colors.red[800]!;
+    switch (prediction.toLowerCase()) {
+      case 'accident':
+        return Colors.red[800]!;
+      case 'no accident':
+        return Colors.green[600]!;
+      default:
+        return Colors.amber[600]!;
     }
-    return Colors.red[800]!;
   }
 
   Future<void> _showSearchDialog() async {
