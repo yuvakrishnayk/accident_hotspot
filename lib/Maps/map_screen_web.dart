@@ -213,7 +213,7 @@ class _MapScreenWebState extends State<MapScreenWeb> {
 
         if (response.statusCode == 200 && response.data != null) {
           return {
-            'prediction': response.data['prediction'] ?? 'No Accident',
+            'prediction': response.data['prediction'] ?? 'Accident',
             'confidence': response.data['confidence']?.toString() ?? '0',
           };
         }
@@ -238,7 +238,7 @@ class _MapScreenWebState extends State<MapScreenWeb> {
 
   Map<String, dynamic> _getDefaultPrediction() {
     return {
-      'prediction': 'No Accident',
+      'prediction': 'Accident',
       'confidence': '50',
     };
   }
