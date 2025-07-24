@@ -191,7 +191,7 @@ class _LoginPageWebState extends State<LoginPageWeb> {
                           child: _buildTextField(
                             controller: emailController,
                             label: 'Email',
-                            hint: 'Enter your email',
+                            hint: 'Ex : test@gmail.com',
                             icon: Icons.email_outlined,
                             accentColor: accentColor,
                           ),
@@ -361,7 +361,7 @@ class _LoginPageWebState extends State<LoginPageWeb> {
       obscureText: !isPasswordVisible,
       decoration: InputDecoration(
         labelText: 'Password',
-        hintText: 'Enter your password',
+        hintText: 'Ex : 123456',
         prefixIcon: Icon(Icons.lock_outline, color: accentColor),
         suffixIcon: IconButton(
           icon: Icon(
