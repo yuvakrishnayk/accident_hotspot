@@ -66,4 +66,5 @@ class DefaultFirebaseOptions {
     projectId: 'accidentpred-2d2d6',
     storageBucket: 'accidentpred-2d2d6.firebasestorage.app',
   );
+
 }
