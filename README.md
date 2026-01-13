@@ -1,10 +1,10 @@
-# SafeRoute: Accident Hotspot Prediction and Prevention System
+# Safora: Accident Hotspot Prediction and Prevention System
 
 A cutting-edge solution leveraging artificial intelligence and machine learning to predict and prevent road accidents through proactive location analysis and real-time alerts.
 
 ## Project Overview
 
-SafeRoute is an innovative system that harnesses the power of data analytics and predictive modeling to identify potential accident hotspots before incidents occur. By analyzing historical accident data, traffic patterns, and environmental conditions, SafeRoute creates a dynamic risk assessment map that empowers drivers, pedestrians, and authorities to make informed decisions for safer travel.
+Safora is an innovative system that harnesses the power of data analytics and predictive modeling to identify potential accident hotspots before incidents occur. By analyzing historical accident data, traffic patterns, and environmental conditions, Safora creates a dynamic risk assessment map that empowers drivers, pedestrians, and authorities to make informed decisions for safer travel.
 
 ## Key Features
 
@@ -93,7 +93,7 @@ flutter build web --release  # For Web
 
 ## Behind the Innovation
 
-SafeRoute represents a paradigm shift in road safety management - moving from reactive incident response to proactive prevention through the convergence of big data, machine learning, and real-time communication technologies. By democratizing access to predictive safety information, we aim to create a future where preventable accidents are significantly reduced.
+Safora represents a paradigm shift in road safety management - moving from reactive incident response to proactive prevention through the convergence of big data, machine learning, and real-time communication technologies. By democratizing access to predictive safety information, we aim to create a future where preventable accidents are significantly reduced.
 
 ## Join Our Mission
 
