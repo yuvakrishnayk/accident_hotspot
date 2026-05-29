@@ -1,5 +1,5 @@
 # ScreenShots
-<img width="363" height="808" alt="Screenshot 2026-05-29 134516" src="https://github.com/user-attachments/assets/cc19d2a9-877d-4719-a071-96acf17a53a3" />
+<img width="150" height="150" alt="Screenshot 2026-05-29 134516" src="https://github.com/user-attachments/assets/cc19d2a9-877d-4719-a071-96acf17a53a3" />
 <img width="362" height="806" alt="image" src="https://github.com/user-attachments/assets/2fb1d5e4-32cf-4986-a0ed-824f4d177895" />
 <img width="362" height="810" alt="image" src="https://github.com/user-attachments/assets/af06cde8-80c2-48d9-98c2-2f95a5133b29" />
 <img width="360" height="807" alt="image" src="https://github.com/user-attachments/assets/139a2899-48a3-4e6e-ab07-e3a3927553c2" />
