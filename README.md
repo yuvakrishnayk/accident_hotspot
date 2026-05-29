@@ -1,3 +1,6 @@
+# ScreenShots
+<img width="363" height="808" alt="Screenshot 2026-05-29 134516" src="https://github.com/user-attachments/assets/cc19d2a9-877d-4719-a071-96acf17a53a3" />
+
 # Safora: Accident Hotspot Prediction and Prevention System
 
 A cutting-edge solution leveraging artificial intelligence and machine learning to predict and prevent road accidents through proactive location analysis and real-time alerts.
